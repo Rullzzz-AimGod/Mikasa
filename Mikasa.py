@@ -52,9 +52,6 @@ def check_update():
         print("[ ! ] Gagal cek update (tidak ada koneksi / repo error). Lanjut pakai versi lokal.\n")
     except FileNotFoundError:
         print("[ ! ] Git tidak ditemukan. Pastikan git sudah terinstall.\n")
-        if __name__ == "__main__":
-            check_update()
-
 # ===================== WARNA =====================
 R = '\033[1;31m'
 G = '\033[1;32m'
@@ -1232,6 +1229,7 @@ def menu_utama():
         sys.exit(0)
 
 if __name__ == "__main__":
+    check_update()
     try:
         menu_utama()
     except KeyboardInterrupt:
