@@ -195,17 +195,17 @@ def menu_uid():
     uid = get_uid()
     print(f"""
 {Y}┌─────────────────────────────────────────────────────────────┐
-{Y}│{W}              🔐 SISTEM REGISTRASI UID                     {Y}│
+{Y}│{W}              🔐 SISTEM REGISTRASI UID                 {Y}│
 {Y}├─────────────────────────────────────────────────────────────┤
-{Y}│{W}  UID Device   : {G}{uid}{W}                                  {Y}│
-{Y}│{W}  Status       : {R}Belum Terdaftar{W}                         {Y}│
+{Y}│{W}  UID Device   : {G}{uid}{W}                           {Y}│
+{Y}│{W}  Status       : {R}Belum Terdaftar{W}                 {Y}│
 {Y}├─────────────────────────────────────────────────────────────┤
-{Y}│{W}  Silakan daftar dengan membuat username                   {Y}│
-{Y}│{W}  Username harus 3-12 karakter, tanpa spasi               {Y}│
+{Y}│{W}  Silakan daftar dengan membuat username               {Y}│
+{Y}│{W}  Username harus 3-12 karakter, tanpa spasi            {Y}│
 {Y}├─────────────────────────────────────────────────────────────┤
-{Y}│{Y}  [1] Daftar UID baru                                     {Y}│
-{Y}│{Y}  [2] Coba lagi (refresh)                                 {Y}│
-{Y}│{Y}  [0] Keluar                                              {Y}│
+{Y}│{Y}  [1] Daftar UID baru                                  {Y}│
+{Y}│{Y}  [2] Coba lagi (refresh)                              {Y}│
+{Y}│{Y}  [0] Keluar                                           {Y}│
 {Y}└─────────────────────────────────────────────────────────────┘{N}
 """)
     pilihan = input(f"{W}└─{R}${N} ").strip()
@@ -231,7 +231,7 @@ def menu_uid():
     else:
         return menu_uid()
 
-# ===================== WARNA =====================
+
 R = '\033[1;31m'
 G = '\033[1;32m'
 Y = '\033[1;33m'
@@ -240,7 +240,7 @@ C = '\033[1;36m'
 W = '\033[1;37m'
 N = '\033[0m'
 
-# ===================== ANIMASI LOADING =====================
+
 stop_animasi = False
 
 def animasi_loading(text="Loading", durasi=2):
@@ -265,7 +265,7 @@ def loading_masuk():
     t.join(timeout=0.5)
     print("\r" + " " * 50 + "\r", end="")
 
-# ===================== FUNGSI =====================
+
 def get_user():
     try:
         return os.popen('whoami').read().strip()
@@ -275,7 +275,6 @@ def get_user():
 def get_date():
     return datetime.now().strftime("%d-%m-%Y")
 
-# ===================== BANNER =====================
 def print_banner(user, date):
     uid = get_uid()
     status, _ = cek_uid(uid)
