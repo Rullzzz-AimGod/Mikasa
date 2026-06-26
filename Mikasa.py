@@ -44,17 +44,20 @@ def check_update():
 
         if local != remote:
             print("[ ! ] Update tersedia! Menarik versi terbaru...")
+            time.sleep(2)
             subprocess.run(["git", "pull", "origin", "main"], check=True)
             print("[ + ] Update selesai. Silakan jalankan ulang tools.")
+            time.sleep(2)
             sys.exit(0)
         else:
             print("[ + ] Tools sudah versi terbaru.\n")
-
+            time.sleep(2)
     except subprocess.CalledProcessError:
         print("[ ! ] Gagal cek update (tidak ada koneksi / repo error). Lanjut pakai versi lokal.\n")
+        time.sleep(2)
     except FileNotFoundError:
         print("[ ! ] Git tidak ditemukan. Pastikan git sudah terinstall.\n")
-
+        time.sleep(2)
 #verifikasi
 
 BIN_ID = "6a3d5d48da38895dfefe7001"
@@ -64,19 +67,55 @@ BOT_TOKEN = "8685515038:AAEW_N4J98oYLIMpP71Fc9W99ha7nR4mJAs"
 ADMIN_ID = "8873967955"
 
 def get_uid():
+    uid_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".device_uid")
+
+
+    if os.path.exists(uid_file):
+        try:
+            with open(uid_file, "r") as f:
+                saved_uid = f.read().strip()
+            if saved_uid:
+                return saved_uid
+        except:
+            pass
+
+
+    identifiers = []
+
     try:
-        identifiers = []
         identifiers.append(socket.gethostname())
-        mac = subprocess.check_output(['cat', '/sys/class/net/wlan0/address'], stderr=subprocess.DEVNULL).decode().strip()
-        identifiers.append(mac)
-        serial = subprocess.check_output(['getprop', 'ro.serialno'], stderr=subprocess.DEVNULL).decode().strip()
-        identifiers.append(serial)
-        if not any(identifiers):
-            identifiers.append(str(uuid.getnode()))
-        raw = ''.join(identifiers)
-        return hashlib.sha256(raw.encode()).hexdigest()[:16]
     except:
-        return hashlib.sha256(str(uuid.getnode()).encode()).hexdigest()[:16]
+        pass
+
+    try:
+        mac = subprocess.check_output(
+            ['cat', '/sys/class/net/wlan0/address'],
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+        identifiers.append(mac)
+    except:
+        pass
+
+    try:
+        serial = subprocess.check_output(
+            ['getprop', 'ro.serialno'],
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+        identifiers.append(serial)
+    except:
+        pass
+
+    identifiers.append(str(uuid.uuid4()))
+    raw = ''.join(identifiers)
+    new_uid = hashlib.sha256(raw.encode()).hexdigest()[:16]
+
+    try:
+        with open(uid_file, "w") as f:
+            f.write(new_uid)
+    except:
+        pass
+
+    return new_uid
 
 def load_database():
     try:
@@ -1527,6 +1566,18 @@ def menu_utama():
 
 if __name__ == "__main__":
     check_update()
+    uid = get_uid()
+    status, user = cek_uid(uid)
+    if status is None:
+        print(f"{R}[!] Gagal terhubung ke server lisensi.{N}")
+        time.sleep(3)
+        sys.exit(1)
+    elif status is False:
+        menu_uid()
+    elif user.get("status") != "active":
+        print(f"{Y}[!] Akun kamu belum diaktivasi admin.{N}")
+        time.sleep(3)
+        sys.exit(0)
     try:
         menu_utama()
     except KeyboardInterrupt:
