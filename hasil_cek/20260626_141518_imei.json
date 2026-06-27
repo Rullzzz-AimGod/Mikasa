@@ -1,0 +1,9 @@
+{
+  "waktu_cek": "2026-06-26T14:15:18.897831",
+  "jenis_cek": "imei",
+  "input": "357513141610395",
+  "success": false,
+  "response": {
+    "error": "404 Client Error: Not Found for url: http://46.247.108.15:3011/cekimei"
+  }
+}
