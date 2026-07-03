@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# MIKASA - RUNNER (Auto Install Package)
 
 import os
 import sys
@@ -7,7 +6,6 @@ import subprocess
 import time
 import threading
 
-# ===================== WARNA =====================
 R = '\033[1;31m'
 G = '\033[1;32m'
 Y = '\033[1;33m'
@@ -16,7 +14,6 @@ C = '\033[1;36m'
 W = '\033[1;37m'
 N = '\033[0m'
 
-# ===================== ANIMASI =====================
 stop_animasi = False
 
 def animasi_loading(text="Loading", durasi=2):
@@ -41,7 +38,6 @@ def animasi_putar(text="Menginstall", durasi=2):
         time.sleep(0.1)
     sys.stdout.write("\r" + " " * 50 + "\r")
 
-# ===================== CEK PKG TERMUX =====================
 def check_termux_pkg(pkg):
     try:
         result = subprocess.check_output(["pkg", "list-installed"], text=True)
@@ -56,7 +52,6 @@ def install_termux_pkg(pkg):
     except:
         return False
 
-# ===================== CEK PKG PYTHON =====================
 def check_python_pkg(pkg):
     try:
         __import__(pkg)
@@ -71,7 +66,6 @@ def install_python_pkg(pkg):
     except:
         return False
 
-# ===================== MAIN =====================
 def auto_install():
     global stop_animasi
     
@@ -93,8 +87,7 @@ def auto_install():
     
     time.sleep(1)
     
-    # ===== CEK & INSTALL PKG TERMUX =====
-    termux_pkgs = ["python", "python-pip", "git", "wget", "curl", "nano"]
+    termux_pkgs = ["python", "python-pip", "git", "wget", "curl", "nano", "mpv"]
     
     print(f"{Y}[•] Mengecek package Termux...{N}")
     time.sleep(0.5)
@@ -132,8 +125,7 @@ def auto_install():
             t.join(timeout=0.5)
             time.sleep(0.5)
     
-    # ===== CEK & INSTALL PKG PYTHON =====
-    python_pkgs = ["requests", "flask", "beautifulsoup4", "cryptography", "colorama", "phonenumbers", "fake-useragent"]
+    python_pkgs = ["requests", "flask", "beautifulsoup4", "cryptography", "colorama", "phonenumbers", "fake-useragent", "termux-api", "yt-dlb pydub", "ffmpeg"]
     
     print(f"\n{Y}[•] Mengecek package Python...{N}")
     time.sleep(0.5)
@@ -167,7 +159,6 @@ def auto_install():
             t.join(timeout=0.5)
             time.sleep(0.5)
     
-    # ===== SELESAI =====
     print(f"""
 {G}─────────────────────────────────────────────────────────────{N}
 {G}  [✓] Semua dependencies berhasil diinstall!{N}
