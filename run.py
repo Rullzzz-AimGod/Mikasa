@@ -125,7 +125,7 @@ def auto_install():
             t.join(timeout=0.5)
             time.sleep(0.5)
     
-    python_pkgs = ["requests", "flask", "beautifulsoup4", "cryptography", "colorama", "phonenumbers", "fake-useragent", "termux-api", "yt-dlb pydub", "ffmpeg"]
+    python_pkgs = ["requests", "flask", "beautifulsoup4", "cryptography", "colorama", "phonenumbers", "fake-useragent", "termux-api", "yt-dlp pydub", "ffmpeg"]
     
     print(f"\n{Y}[•] Mengecek package Python...{N}")
     time.sleep(0.5)
