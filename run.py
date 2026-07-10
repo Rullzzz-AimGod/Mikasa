@@ -71,28 +71,6 @@ def clear_lock_files():
     except:
         return False
 
-def check_python_version():
-    version = sys.version_info
-    if version.major == 3 and version.minor >= 14:
-        print(f"{Y}[!] Python {version.major}.{version.minor} terdeteksi!{N}")
-        print(f"{Y}[*] Menginstall Python 3.13...{N}")
-        try:
-            subprocess.check_call(["pkg", "install", "python3.13", "-y"], 
-                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            result = subprocess.run(["which", "python3.13"], capture_output=True, text=True)
-            if result.returncode == 0:
-                python313_path = result.stdout.strip()
-                print(f"{G}[✓] Python 3.13 terinstall{N}")
-                print(f"{Y}[*] Merestart dengan Python 3.13...{N}")
-                time.sleep(1)
-                os.execv(python313_path, [python313_path] + sys.argv)
-            else:
-                print(f"{R}[!] Gagal install Python 3.13, lanjut dengan versi sekarang{N}")
-        except Exception as e:
-            print(f"{R}[!] Error: {e}{N}")
-            print(f"{Y}[*] Lanjut dengan Python {version.major}.{version.minor}{N}")
-    return True
-
 def check_termux_pkg(pkg):
     try:
         result = subprocess.check_output(["pkg", "list-installed"], text=True, stderr=subprocess.DEVNULL)
@@ -281,18 +259,13 @@ def auto_install():
     os.system('clear')
     
     print(f"""
-{R}╔═╗╔═╦══╦╗╔═╦═══╦═══╦═══╗
-{R}║║╚╝║╠╣╠╣║║╔╣╔═╗║╔═╗║╔═╗║
-{R}║╔╗╔╗║║║║╚╝╝║║─║║╚══╣║─║║
-{R}║║║║║║║║║╔╗║║╚═╝╠══╗║╚═╝║
-{R}║║║║║╠╣╠╣║║╚╣╔═╗║╚═╝║╔═╗║
-{R}╚╝╚╝╚╩══╩╝╚═╩╝─╚╩═══╩╝─╚╝{N}
-
-{R}─────────────────────────────────────────────────────────────{N}
-{R}       {W}MIKASA {N}v1.0.0{N}
-{R}       {W}Sedang mengecek dependencies...{N}
-{R}─────────────────────────────────────────────────────────────{N}
-    """)
+{C}┌─────────────────────────────────────────────────────────────┐{N}
+{C}│{W}  Sedang Mengecek & Mendownload Dependencies...          {C}│{N}
+{C}│{W}  Ini sedang mengecek dependencies, tunggu aja           {C}│{N}
+{C}│{W}  ga usah nanya-nanya admin                             {C}│{N}
+{C}│{W}  Sampai pengecekan & mendownload selesai               {C}│{N}
+{C}└─────────────────────────────────────────────────────────────┘{N}
+""")
     
     time.sleep(1)
     
