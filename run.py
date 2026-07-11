@@ -182,7 +182,6 @@ def install_python313_via_pyenv():
 
     try:
         if not os.path.isdir(pyenv_root):
-            print(f"  {Y}[*]{W} Menginstall pyenv...{N}")
             subprocess.check_call(
                 ["git", "clone", "https://github.com/pyenv/pyenv.git", pyenv_root],
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
@@ -195,15 +194,13 @@ def install_python313_via_pyenv():
 
         installed = subprocess.run([pyenv_bin, "versions"], capture_output=True, text=True, env=env)
         if "3.13.5" not in installed.stdout:
-            print(f"  {Y}[*]{W} Menyiapkan dependency build...{N}")
             build_deps = ["build-essential", "openssl", "libffi", "zlib", "readline", "sqlite", "bzip2", "ncurses"]
             for dep in build_deps:
                 if not check_termux_pkg(dep):
                     install_termux_pkg(dep)
 
-            print(f"  {Y}[*]{W} Build Python 3.13.5 dari source (bisa makan waktu 10-20 menit, jangan ditutup)...{N}")
             stop_event = threading.Event()
-            t = threading.Thread(target=loading_bar_warna, args=(stop_event, "Build Python 3.13.5"))
+            t = threading.Thread(target=loading_bar_warna, args=(stop_event, "Menginstall Pyenv"))
             t.daemon = True
             t.start()
 
@@ -216,35 +213,32 @@ def install_python313_via_pyenv():
             t.join(timeout=0.5)
 
             if result.returncode != 0:
-                print(f"\r  {R}[✗]{W} Build Python 3.13.5 gagal (cek manual: pyenv install 3.13.5){N}")
+                print(f"\r  {R}[✗]{W} Python 3.13.5 gagal diinstall (coba manual){N}")
                 return None
 
-            print(f"\r  {G}[✓]{W} Python 3.13.5 berhasil dibuild{N}")
+            print(f"\r  {G}[✓]{W} Python 3.13.5 berhasil diinstall{N}")
 
         target = os.path.join(pyenv_root, "versions", "3.13.5", "bin", "python3")
         return target if os.path.isfile(target) else None
-    except Exception as e:
-        print(f"  {R}[✗]{W} Gagal setup pyenv: {e}{N}")
+    except Exception:
         return None
 
 def ensure_python313():
     if sys.version_info[:2] < (3, 14):
         return
 
-    print(f"\n{Y}[•] Python {get_python_version_str()} terdeteksi tidak kompatibel dengan pyrogram dkk (butuh <3.14){N}")
-
     target = find_existing_python313()
-    if not target:
-        target = install_python313_via_pyenv()
+    if target:
+        os.execv(target, [target] + sys.argv)
+        return
+
+    print(f"  {Y}[*]{W} Cek Pyenv ", end="")
+    print(f"{R}✗ MISSING{N}")
+    target = install_python313_via_pyenv()
 
     if target:
-        print(f"  {G}[✓]{W} Beralih otomatis ke {target}{N}")
-        time.sleep(1)
+        time.sleep(0.5)
         os.execv(target, [target] + sys.argv)
-    else:
-        print(f"  {R}[✗]{W} Gagal menyiapkan Python 3.13.5, lanjut pakai Python {get_python_version_str()}{N}")
-        print(f"  {Y}[!]{W} Beberapa package (pyrogram) mungkin masih error{N}")
-        time.sleep(2)
 
 def install_ffmpeg():
     print(f"  {Y}[*]{W} Cek ffmpeg... ", end="")
@@ -412,8 +406,6 @@ def create_music_folder():
 def auto_install():
     global stop_animasi
 
-    ensure_python313()
-
     os.system('clear')
     
     print(f"""
@@ -450,8 +442,6 @@ def auto_install():
 {W}╰───────────────────────────────────────────────────────────╯{N}
 """)
     
-    pkg_update_upgrade()
-    
     termux_pkgs = [
         "python", "python-pip", "git", "wget", "curl", 
         "nano", "openssl", "ffmpeg", "nmap", "mpv",
@@ -460,6 +450,8 @@ def auto_install():
     
     print(f"\n{G}[•]{W} Mengecek package Termux...{N}")
     time.sleep(0.5)
+    
+    ensure_python313()
     
     missing_termux = []
     for pkg in termux_pkgs:
