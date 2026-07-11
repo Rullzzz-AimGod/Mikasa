@@ -7,6 +7,7 @@ import time
 import threading
 import shutil
 import warnings
+import platform
 
 R = '\033[1;31m'
 G = '\033[1;32m'
@@ -17,6 +18,15 @@ W = '\033[1;37m'
 N = '\033[0m'
 
 stop_animasi = False
+
+def is_termux_arm64():
+    try:
+        if 'Android' in platform.platform():
+            arch = platform.machine()
+            return arch in ['aarch64', 'arm64', 'armv8l']
+    except:
+        pass
+    return False
 
 def loading_bar_warna(stop_event, text="Menginstall"):
     COLORS = ['\x1b[1;91m', '\x1b[1;93m', '\x1b[1;92m', '\x1b[1;94m']
@@ -69,42 +79,6 @@ def clear_lock_files():
     except:
         return False
 
-def pkg_update_upgrade():
-    print(f"\n{G}[>]{W} Menjalankan pkg update && pkg upgrade{N}")
-    time.sleep(0.5)
-    try:
-        kill_lock_process()
-        clear_lock_files()
-        time.sleep(0.5)
-        
-        stop_event = threading.Event()
-        t = threading.Thread(target=loading_bar_warna, args=(stop_event, "pkg update"))
-        t.daemon = True
-        t.start()
-        
-        subprocess.check_call(["pkg", "update", "-y"], 
-                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        
-        stop_event.set()
-        t.join(timeout=0.5)
-        print(f"\r  {G}[✓]{W} pkg update selesai{N}")
-        
-        stop_event = threading.Event()
-        t = threading.Thread(target=loading_bar_warna, args=(stop_event, "pkg upgrade"))
-        t.daemon = True
-        t.start()
-        
-        subprocess.check_call(["pkg", "upgrade", "-y"], 
-                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        
-        stop_event.set()
-        t.join(timeout=0.5)
-        print(f"\r  {G}[✓]{W} pkg upgrade selesai{N}")
-        return True
-    except:
-        print(f"  {R}[✗]{W} pkg update/upgrade gagal, lanjut install...{N}")
-        return False
-
 def check_termux_pkg(pkg):
     try:
         result = subprocess.check_output(["pkg", "list-installed"], text=True, stderr=subprocess.DEVNULL)
@@ -128,20 +102,28 @@ def install_termux_pkg(pkg):
         except:
             return False
 
+def get_python_executable():
+    pyenv_python = os.path.expanduser("~/.pyenv/versions/3.13.5/bin/python3")
+    if os.path.isfile(pyenv_python):
+        return pyenv_python
+    return sys.executable
+
 def install_python_pkg(pkg):
+    python_exe = get_python_executable()
     try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", pkg, "--break-system-packages"], 
+        subprocess.check_call([python_exe, "-m", "pip", "install", pkg, "--break-system-packages"], 
                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return True
     except:
         try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", pkg], 
+            subprocess.check_call([python_exe, "-m", "pip", "install", pkg], 
                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             return True
         except:
             return False
 
 def check_python_pkg(pkg):
+    python_exe = get_python_executable()
     try:
         import_name = pkg
         if pkg == "fake-useragent":
@@ -158,9 +140,10 @@ def check_python_pkg(pkg):
             import_name = "tgcrypto"
         elif pkg == "pyrogram":
             import_name = "pyrogram"
-        __import__(import_name)
+        subprocess.check_call([python_exe, "-c", f"import {import_name}"], 
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return True
-    except ImportError:
+    except Exception:
         return False
 
 def get_python_version_str():
@@ -177,78 +160,140 @@ def find_existing_python313():
             return c
     return None
 
-def install_python313_via_pyenv():
+def install_pyenv():
     pyenv_root = os.path.expanduser("~/.pyenv")
-
     try:
+        if os.path.isdir(pyenv_root):
+            shutil.rmtree(pyenv_root, ignore_errors=True)
+
+        subprocess.check_call(
+            "curl -s https://pyenv.run | bash",
+            shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
+
         if not os.path.isdir(pyenv_root):
-            subprocess.check_call(
-                ["git", "clone", "https://github.com/pyenv/pyenv.git", pyenv_root],
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-            )
+            return False
 
-        pyenv_bin = os.path.join(pyenv_root, "bin", "pyenv")
-        env = os.environ.copy()
-        env["PYENV_ROOT"] = pyenv_root
-        env["PATH"] = f"{pyenv_root}/bin:{env.get('PATH', '')}"
+        shell_cfg = os.path.expanduser("~/.zshrc") if os.environ.get("ZSH_VERSION") else os.path.expanduser("~/.bashrc")
+        cfg_lines = [
+            'export PYENV_ROOT="$HOME/.pyenv"\n',
+            '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"\n',
+            'eval "$(pyenv init -)"\n',
+        ]
+        try:
+            existing = ""
+            if os.path.isfile(shell_cfg):
+                with open(shell_cfg) as f:
+                    existing = f.read()
+            with open(shell_cfg, "a") as f:
+                for line in cfg_lines:
+                    if line.strip() not in existing:
+                        f.write(line)
+        except Exception:
+            pass
 
-        installed = subprocess.run([pyenv_bin, "versions"], capture_output=True, text=True, env=env)
-        if "3.13.5" not in installed.stdout:
-            build_deps = ["build-essential", "openssl", "libffi", "zlib", "readline", "sqlite", "bzip2", "ncurses"]
-            for dep in build_deps:
-                if not check_termux_pkg(dep):
-                    install_termux_pkg(dep)
+        return True
+    except Exception:
+        return False
 
-            stop_event = threading.Event()
-            t = threading.Thread(target=loading_bar_warna, args=(stop_event, "Menginstall Pyenv"))
-            t.daemon = True
-            t.start()
+def build_python313_via_pyenv():
+    pyenv_root = os.path.expanduser("~/.pyenv")
+    pyenv_bin = os.path.join(pyenv_root, "bin", "pyenv")
+    env = os.environ.copy()
+    env["PYENV_ROOT"] = pyenv_root
+    env["PATH"] = f"{pyenv_root}/bin:{env.get('PATH', '')}"
 
-            result = subprocess.run(
-                [pyenv_bin, "install", "3.13.5"],
-                env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-            )
+    env["CPPFLAGS"] = "-Wno-error=implicit-function-declaration -Wno-implicit-function-declaration -Wno-error=int-conversion -Wno-int-conversion"
+    env["LDFLAGS"] = "-latomic"
+    env["ac_cv_func_getpwent"] = "no"
+    env["ac_cv_func_copy_file_range"] = "no"
+    env["ac_cv_func_sendfile"] = "no"
+    env["ac_cv_func_posix_spawn"] = "no"
+    env["ac_cv_func_posix_spawnp"] = "no"
+    env["PYTHON_CONFIGURE_OPTS"] = "--disable-shared"
+    
+    if is_termux_arm64():
+        env["CFLAGS"] = "-O2 -march=armv8-a+crc -mtune=cortex-a53"
+        env["MAKEFLAGS"] = "-j2"
 
-            stop_event.set()
-            t.join(timeout=0.5)
-
-            if result.returncode != 0:
-                print(f"\r  {R}[✗]{W} Python 3.13.5 gagal diinstall (coba manual){N}")
-                return None
-
-            print(f"\r  {G}[✓]{W} Python 3.13.5 berhasil diinstall{N}")
+    print(f"  {Y}[!]{W} Build Python 3.13.5 bisa memakan waktu 10-30 menit, mohon tunggu...{N}")
+    
+    try:
+        result = subprocess.run(
+            [pyenv_bin, "install", "3.13.5"],
+            env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
+        if result.returncode != 0:
+            return None
 
         target = os.path.join(pyenv_root, "versions", "3.13.5", "bin", "python3")
         return target if os.path.isfile(target) else None
     except Exception:
         return None
 
-def ensure_python313():
-    if sys.version_info[:2] < (3, 14):
-        return
+def is_pyenv_working():
+    pyenv_root = os.path.expanduser("~/.pyenv")
+    pyenv_bin = os.path.join(pyenv_root, "bin", "pyenv")
+    if not os.path.isfile(pyenv_bin):
+        return False
+    try:
+        result = subprocess.run([pyenv_bin, "--version"], capture_output=True, text=True, timeout=10)
+        return result.returncode == 0
+    except Exception:
+        return False
 
+def ensure_python313():
+    print(f"  [ {G}>{W} ] Cek Python... ", end="")
+    
+    pyversion = subprocess.run([sys.executable, "--version"], capture_output=True, text=True)
+    
+    if "3.13" in pyversion.stdout or "3.13" in pyversion.stderr:
+        print(f"{G}✓ OK (versi 3.13){N}")
+        return True
+    
+    print(f"{Y}✗ DETECTED {get_python_version_str()}, downgrade ke 3.13.5{N}")
+    
     target = find_existing_python313()
     if target:
-        os.execv(target, [target] + sys.argv)
-        return
+        print(f"  {G}[✓]{W} Python 3.13 ditemukan di {target}{N}")
+        return True
+    
+    print(f"  [ {G}>{W} ] Cek pyenv... ", end="")
+    if is_pyenv_working():
+        print(f"{G}✓ OK{N}")
+    else:
+        print(f"{R}✗ MISSING{N}")
+        stop_event = threading.Event()
+        t = threading.Thread(target=loading_bar_warna, args=(stop_event, "Menginstall pyenv"))
+        t.daemon = True
+        t.start()
+        ok = install_pyenv()
+        stop_event.set()
+        t.join(timeout=0.5)
+        if ok and is_pyenv_working():
+            print(f"\r  {G}[✓]{W} pyenv berhasil diinstall{N}")
+        else:
+            print(f"\r  {R}[✗]{W} pyenv gagal diinstall (coba manual: curl -s https://pyenv.run | bash){N}")
+            return False
 
-    print(f"  {Y}[*]{W} Cek Pyenv ", end="")
-    print(f"{R}✗ MISSING{N}")
-    target = install_python313_via_pyenv()
-
+    target = build_python313_via_pyenv()
+    
     if target:
-        time.sleep(0.5)
-        os.execv(target, [target] + sys.argv)
+        print(f"  {G}[✓]{W} Python 3.13.5 berhasil diinstall{N}")
+        return True
+    else:
+        print(f"  {R}[✗]{W} Python 3.13.5 gagal diinstall (coba manual: pyenv install 3.13.5){N}")
+        return False
 
 def install_ffmpeg():
-    print(f"  {Y}[*]{W} Cek ffmpeg... ", end="")
+    print(f"  [ {G}>{W} ] Cek ffmpeg... ", end="")
     try:
         subprocess.run(['ffmpeg', '-version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         print(f"{G}✓ OK{N}")
         return True
     except:
         print(f"{R}✗ MISSING{N}")
-        print(f"  {Y}[*]{W} Menginstall ffmpeg...{N}")
+        print(f"  [ {G}>{W} ] Menginstall ffmpeg...{N}")
         
         stop_event = threading.Event()
         t = threading.Thread(target=loading_bar_warna, args=(stop_event, "ffmpeg"))
@@ -280,14 +325,14 @@ def install_ffmpeg():
                 return False
 
 def install_nmap():
-    print(f"  {Y}[*]{W} Cek nmap... ", end="")
+    print(f"  [ {G}>{W} ] Cek nmap... ", end="")
     try:
         subprocess.run(['nmap', '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         print(f"{G}✓ OK{N}")
         return True
     except:
         print(f"{R}✗ MISSING{N}")
-        print(f"  {Y}[*]{W} Menginstall nmap...{N}")
+        print(f"  [ {G}>{W} ] Menginstall nmap...{N}")
         
         stop_event = threading.Event()
         t = threading.Thread(target=loading_bar_warna, args=(stop_event, "nmap"))
@@ -319,14 +364,14 @@ def install_nmap():
                 return False
 
 def install_mpv():
-    print(f"  {Y}[*]{W} Cek mpv... ", end="")
+    print(f"  [ {G}>{W} ] Cek mpv... ", end="")
     try:
         subprocess.run(['mpv', '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         print(f"{G}✓ OK{N}")
         return True
     except:
         print(f"{R}✗ MISSING{N}")
-        print(f"  {Y}[*]{W} Menginstall mpv...{N}")
+        print(f"  [ {G}>{W} ] Menginstall mpv...{N}")
         
         stop_event = threading.Event()
         t = threading.Thread(target=loading_bar_warna, args=(stop_event, "mpv"))
@@ -358,14 +403,14 @@ def install_mpv():
                 return False
 
 def install_termux_media():
-    print(f"  {Y}[*]{W} Cek termux-media-player... ", end="")
+    print(f"  [ {G}>{W} ] Cek termux-media-player... ", end="")
     try:
         subprocess.run(['termux-media-player', '--help'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         print(f"{G}✓ OK{N}")
         return True
     except:
         print(f"{R}✗ MISSING{N}")
-        print(f"  {Y}[*]{W} Menginstall termux-media-player...{N}")
+        print(f"  [ {G}>{W} ] Menginstall termux-media-player...{N}")
         
         stop_event = threading.Event()
         t = threading.Thread(target=loading_bar_warna, args=(stop_event, "termux-media-player"))
@@ -451,11 +496,9 @@ def auto_install():
     print(f"\n{G}[•]{W} Mengecek package Termux...{N}")
     time.sleep(0.5)
     
-    ensure_python313()
-    
     missing_termux = []
     for pkg in termux_pkgs:
-        print(f"  {Y}[*]{W} Cek {pkg}... ", end="")
+        print(f"  [ {G}>{W} ] Cek {pkg}... ", end="")
         if check_termux_pkg(pkg):
             print(f"{G}✓ OK{N}")
         else:
@@ -482,10 +525,14 @@ def auto_install():
             
             time.sleep(0.5)
     
+    print(f"\n{Y}[•] Mengecek & Install Python 3.13.5...{N}")
+    if not ensure_python313():
+        print(f"  {R}[✗]{W} Gagal menginstall Python 3.13.5, lanjut dengan versi saat ini{N}")
+    
     python_pkgs = [
         "requests", "flask", "beautifulsoup4", "cryptography", 
         "colorama", "phonenumbers", "fake-useragent", "yt-dlp",
-        "pydub", "pyrogram", "rich", "pystyle", "tgcrypto",
+        "pydub", "rich", "pystyle",
         "pyfiglet", "lolcat"
     ]
     
@@ -494,7 +541,7 @@ def auto_install():
     
     missing_python = []
     for pkg in python_pkgs:
-        print(f"  {Y}[*]{W} Cek {pkg}... ", end="")
+        print(f"  [ {G}>{W} ] Cek {pkg}... ", end="")
         if check_python_pkg(pkg):
             print(f"{G}✓ OK{N}")
         else:
@@ -552,11 +599,12 @@ def auto_install():
     print(f"{W}╰────────────────────────────────────────────────────────────────╯{N}")
     time.sleep(2)
     
+    python_exe = get_python_executable()
     try:
-        os.execv(sys.executable, [sys.executable, "Mikasa.py"])
+        os.execv(python_exe, [python_exe, "Mikasa.py"])
     except FileNotFoundError:
         print(f"{R}[!] File Mikasa.py tidak ditemukan!{N}")
-        print(f"{Y}[*] Pastikan file Mikasa.py ada di folder ini{N}")
+        print(f"[ {G}>{W} ] Pastikan file Mikasa.py ada di folder ini{N}")
         sys.exit(1)
 
 if __name__ == "__main__":
