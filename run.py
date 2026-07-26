@@ -140,6 +140,8 @@ def check_python_pkg(pkg):
             import_name = "tgcrypto"
         elif pkg == "pyrogram":
             import_name = "pyrogram"
+        elif pkg == "pycryptodome"
+            import_name = "pycryptodome"
         subprocess.check_call([python_exe, "-c", f"import {import_name}"], 
                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return True
@@ -489,8 +491,7 @@ def auto_install():
     
     termux_pkgs = [
         "python", "python-pip", "git", "wget", "curl", 
-        "nano", "openssl", "ffmpeg", "nmap", "mpv",
-        "termux-media-player"
+        "nano", "openssl", "ffmpeg", "nmap", "mpv"
     ]
     
     print(f"\n{G}[•]{W} Mengecek package Termux...{N}")
@@ -533,7 +534,7 @@ def auto_install():
         "requests", "flask", "beautifulsoup4", "cryptography", 
         "colorama", "phonenumbers", "fake-useragent", "yt-dlp",
         "pydub", "rich", "pystyle",
-        "pyfiglet", "lolcat"
+        "pyfiglet", "lolcat", "pycryptodome"
     ]
     
     print(f"\n{Y}[•] Mengecek package Python...{N}")

