@@ -140,7 +140,7 @@ def check_python_pkg(pkg):
             import_name = "tgcrypto"
         elif pkg == "pyrogram":
             import_name = "pyrogram"
-        elif pkg == "pycryptodome"
+        elif pkg == "pycryptodome":
             import_name = "pycryptodome"
         subprocess.check_call([python_exe, "-c", f"import {import_name}"], 
                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
