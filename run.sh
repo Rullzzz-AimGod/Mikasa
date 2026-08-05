@@ -477,7 +477,7 @@ ${W}╰────────────────────────�
     
     local termux_pkgs=(
         "python" "python-pip" "git" "wget" "curl"
-        "nano" "openssl" "ffmpeg" "nmap" "mpv"
+        "nano" "openssl" "ffmpeg" "mpv"
     )
     
     echo -e "\n${G}[•]${W} Mengecek package Termux...${N}"
@@ -515,7 +515,7 @@ ${W}╰────────────────────────�
         done
     fi
     
-    echo -e "\n${Y}[•] Mengecek & Install Python 3.13.5...${N}"
+    echo -e "\n${G}[•]${W} Mengecek & Install Python 3.13.5...${N}"
     if ! ensure_python313; then
         echo -e "  ${R}[✗]${W} Gagal menginstall Python 3.13.5, lanjut dengan versi saat ini${N}"
     fi
@@ -527,7 +527,7 @@ ${W}╰────────────────────────�
         "pyfiglet" "lolcat" "pycryptodome"
     )
     
-    echo -e "\n${Y}[•] Mengecek package Python...${N}"
+    echo -e "\n${G}[•]${W} Mengecek package Python...${N}"
     sleep 0.5
     
     local missing_python=()
@@ -543,7 +543,7 @@ ${W}╰────────────────────────�
     done
     
     if [ ${#missing_python[@]} -gt 0 ]; then
-        echo -e "\n${Y}[•] Menginstall package Python yang hilang...${N}"
+        echo -e "\n${R}[•]${W} Menginstall package Python yang hilang...${N}"
         for pkg in "${missing_python[@]}"; do
             stop_animasi=0
             loading_bar_warna "Menginstall $pkg" &
@@ -562,30 +562,28 @@ ${W}╰────────────────────────�
         done
     fi
     
-    echo -e "\n${Y}[•] Mengecek ffmpeg...${N}"
+    echo -e "\n${G}[•]${W} Mengecek ffmpeg...${N}"
+    sleep 2
     install_ffmpeg
     
-    echo -e "\n${Y}[•] Mengecek nmap...${N}"
+    echo -e "\n${G}[•]${W} Mengecek nmap...${N}"
+    sleep 2
     install_nmap
     
-    echo -e "\n${Y}[•] Mengecek mpv...${N}"
+    echo -e "\n${G}[•]${W} Mengecek mpv...${N}"
+    sleep 2
     install_mpv
     
-    echo -e "\n${Y}[•] Mengecek termux-media-player...${N}"
+    echo -e "\n${G}[•]${W} Mengecek termux-media-player...${N}"
+    sleep 2
     install_termux_media
     
-    echo -e "\n${Y}[•] Membuat folder Musik...${N}"
+    echo -e "\n${G}[•]${W} Membuat folder Musik...${N}"
+    sleep 3
     if create_music_folder; then
         echo -e "  ${G}[✓]${W} Folder Musik berhasil dibuat${N}"
     else
-        echo -e "  ${Y}[!]${W} Folder Musik gagal dibuat, coba manual${N}"
-    fi
-    
-    local item_folder="$(dirname "$(realpath "$0")")/item"
-    if mkdir -p "$item_folder" 2>/dev/null; then
-        echo -e "  ${G}[✓]${W} Folder 'item' berhasil dibuat${N}"
-    else
-        echo -e "  ${Y}[!]${W} Gagal membuat folder 'item'${N}"
+        echo -e "  ${R}[!]${W} Folder Musik gagal dibuat, coba manual${N}"
     fi
     
     echo -e "${W}╭────────────────────────────────────────────────────────────────╮${N}"
@@ -593,17 +591,18 @@ ${W}╰────────────────────────�
     echo -e "${W}│ Melanjutkan Proses Running ${G}Tools${N}│"
     echo -e "${W}╰────────────────────────────────────────────────────────────────╯${N}"
     sleep 2
-    
-    local python_exe=$(get_python_executable)
-    if [ -f "Mikasa.py" ]; then
-        exec "$python_exe" "Mikasa.py"
+
+    if [ -f "Mikasa.sh" ]; then
+        sleep 1
+        chmod +x Mikasa.sh
+        ./Mikasa.sh
     else
-        echo -e "${R}[!] File Mikasa.py tidak ditemukan!${N}"
-        echo -e "[ ${G}>${W} ] Pastikan file Mikasa.py ada di folder ini${N}"
+        echo -e "${R}[!]${W} File Mikasa.sh tidak ditemukan!${N}"
+        echo -e "  ${R}[!]${W} Pastikan file Mikasa.sh ada di folder ini${N}"
         exit 1
     fi
 }
 
-trap 'echo -e "\n\n${R}[!] Keluar...${N}"; exit 0' INT
+trap 'echo -e "\n\n${W}[ {G}!{W} ] Keluar...${N}"; exit 0' INT
 
 auto_install
