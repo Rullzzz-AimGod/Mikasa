@@ -248,6 +248,7 @@ ensure_python313() {
     local target=$(find_existing_python313)
     if [ -n "$target" ]; then
         echo -e "  ${G}[✓]${W} Python 3.13 ditemukan di $target${N}"
+        pyenv global 3.13.5
         return 0
     fi
 
@@ -272,6 +273,7 @@ ensure_python313() {
 
     if [ -n "$target" ]; then
         echo -e "  ${G}[✓]${W} Python 3.13.5 berhasil diinstall${N}"
+        pyenv global 3.13.5
         return 0
     else
         echo -e "  ${R}[✗]${W} Python 3.13.5 gagal diinstall (coba manual: pyenv install 3.13.5)${N}"
