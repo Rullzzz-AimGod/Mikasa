@@ -313,38 +313,6 @@ install_ffmpeg() {
     fi
 }
 
-install_nmap() {
-    echo -e "  [ ${G}>${W} ] Cek nmap... \c"
-    if command -v nmap >/dev/null 2>&1; then
-        echo -e "${G}✓ OK${N}"
-        return 0
-    fi
-
-    echo -e "${R}✗ MISSING${N}"
-    echo -e "  [ ${G}>${W} ] Menginstall nmap...${N}"
-
-    loading_bar_warna "nmap" &
-    local pid=$!
-
-    kill_lock_process
-    clear_lock_files
-    sleep 0.2
-
-    if pkg install nmap -y >/dev/null 2>&1; then
-        stop_loading_bar "$pid"
-        echo -e "  ${G}[✓]${W} nmap berhasil diinstall${N}"
-        return 0
-    elif apt install nmap -y >/dev/null 2>&1; then
-        stop_loading_bar "$pid"
-        echo -e "  ${G}[✓]${W} nmap berhasil diinstall${N}"
-        return 0
-    else
-        stop_loading_bar "$pid"
-        echo -e "  ${R}[✗]${W} nmap gagal diinstall (coba manual: pkg install nmap)${N}"
-        return 1
-    fi
-}
-
 install_mpv() {
     echo -e "  [ ${G}>${W} ] Cek mpv... \c"
     if command -v mpv >/dev/null 2>&1; then
